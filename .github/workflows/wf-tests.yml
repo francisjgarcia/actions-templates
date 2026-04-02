@@ -1,0 +1,119 @@
+name: Tests (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      flake8_enabled:
+        required: false
+        type: boolean
+        default: false
+      pytest_enabled:
+        required: false
+        type: boolean
+        default: false
+      test_command:
+        required: false
+        type: string
+        default: ''
+        description: 'Custom test command to run inside the container if flake8/pytest are not used'
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    environment: production
+    if: inputs.tag_version != ''
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load docker image
+        run: docker load -i /tmp/docker-image.tar
+
+      - name: Run flake8
+        if: inputs.flake8_enabled
+        run: |
+          docker run --rm --user root \
+            -v ${{ github.workspace }}/src:/app/src \
+            -v ${{ github.workspace }}/tests:/app/tests \
+            ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }} \
+            sh -c "pip install flake8 > /dev/null 2>&1 && flake8 src/ tests/" > result_flake8.log 2>&1 || true
+
+      - name: Run pytest
+        if: inputs.pytest_enabled
+        run: |
+          if ls tests/test_*.py 1> /dev/null 2>&1; then
+            if ls tests/test_local_*.py 1> /dev/null 2>&1; then
+              echo "Skipping local tests (test_local_*.py)..." > result_pytest.log
+            else
+              docker run --rm --user root \
+                -v ${{ github.workspace }}/src:/app/src \
+                -v ${{ github.workspace }}/tests:/app/tests \
+                ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }} \
+                sh -c "pip install pytest > /dev/null 2>&1 && pytest tests/test_*.py -v" > result_pytest.log 2>&1
+            fi
+          else
+            echo "No test files found, skipping pytest." > result_pytest.log
+          fi
+
+      - name: Run custom test command
+        if: inputs.test_command != ''
+        run: |
+          docker run --rm --user root \
+            -v ${{ github.workspace }}:/app \
+            ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }} \
+            sh -c "${{ inputs.test_command }}" > result_custom.log 2>&1
+
+      - name: Tests summary
+        if: always()
+        run: |
+          echo "## Tests summary" >> $GITHUB_STEP_SUMMARY
+
+          if ${{ inputs.flake8_enabled }}; then
+            echo "### flake8" >> $GITHUB_STEP_SUMMARY
+            if [ ! -f result_flake8.log ] || [ ! -s result_flake8.log ]; then
+              echo "No flake8 errors found." >> $GITHUB_STEP_SUMMARY
+            else
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat result_flake8.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if ${{ inputs.pytest_enabled }}; then
+            echo "### pytest" >> $GITHUB_STEP_SUMMARY
+            if [ ! -f result_pytest.log ]; then
+              echo "No pytest results found." >> $GITHUB_STEP_SUMMARY
+            else
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat result_pytest.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if [[ -n "${{ inputs.test_command }}" ]]; then
+            echo "### Custom tests" >> $GITHUB_STEP_SUMMARY
+            if [ ! -f result_custom.log ]; then
+              echo "No custom test results found." >> $GITHUB_STEP_SUMMARY
+            else
+              echo '```' >> $GITHUB_STEP_SUMMARY
+              cat result_custom.log >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+          if ! ${{ inputs.flake8_enabled }} && ! ${{ inputs.pytest_enabled }} && [[ -z "${{ inputs.test_command }}" ]]; then
+            echo "No tests configured for this repository." >> $GITHUB_STEP_SUMMARY
+          fi
