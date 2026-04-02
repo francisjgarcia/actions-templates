@@ -13,7 +13,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     environment: production
-    # Si calculate-tag devolvió tag vacío (chore/docs/ci), saltamos la release
+    # If calculate-tag returned empty tag (chore/docs/ci), we skip the release
     if: inputs.tag_version != ''
 
     steps:
@@ -34,7 +34,7 @@ jobs:
           echo "" >> $TEMP
           echo "$ENTRIES" >> $TEMP
           echo "" >> $TEMP
-          # Preservar contenido anterior (sin la línea del título)
+          # Preserve previous content (without the title line)
           [ -f CHANGELOG.md ] && sed '/^# Changelog$/d' CHANGELOG.md >> $TEMP
           mv $TEMP CHANGELOG.md
 

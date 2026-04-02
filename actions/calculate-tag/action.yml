@@ -1,15 +1,15 @@
 name: Calculate next semver tag
-description: Calcula el próximo tag semver usando Conventional Commits
+description: Calculate the next semver tag based on conventional commits since the last tag. Outputs the next tag version, the type of bump (major, minor, patch, none) and a list of commits for the changelog.
 
 outputs:
   tag_version:
-    description: Próximo tag (vX.Y.Z) o vacío si no hay release
+    description: Next tag (vX.Y.Z) or empty if no release is needed
     value: ${{ steps.calc.outputs.tag_version }}
   bump_type:
     description: major | minor | patch | none
     value: ${{ steps.calc.outputs.bump_type }}
   changelog_entries:
-    description: Lista de commits para el changelog
+    description: List of commits for the changelog
     value: ${{ steps.calc.outputs.changelog_entries }}
 
 runs:
@@ -19,7 +19,7 @@ runs:
       id: calc
       shell: bash
       run: |
-        # Obtener commits desde el último tag (o todos si no hay ninguno)
+        # Get commits since the last tag (or all if none)
         LAST_TAG=$(git tag -l 'v*' | sort -V | tail -n 1)
         if [ -z "$LAST_TAG" ]; then
           COMMITS=$(git log --pretty=format:"%s" HEAD)
@@ -33,30 +33,30 @@ runs:
         echo "Commits to analyze:"
         echo "$COMMITS"
 
-        # Clasificar cada commit y quedarse con el bump más alto
+        # Classify each commit and keep the highest bump
         BUMP="none"
 
         while IFS= read -r msg; do
           [ -z "$msg" ] && continue
 
-          # BREAKING CHANGE = major (! en el tipo o footer BREAKING CHANGE:)
+          # BREAKING CHANGE = major (! in type or footer BREAKING CHANGE:)
           if echo "$msg" | grep -qE '^[a-z]+(\(.+\))?!:' || echo "$msg" | grep -q 'BREAKING CHANGE:'; then
             BUMP="major"
 
-          # feat = minor (solo si no hemos llegado a major)
+          # feat = minor (only if we haven't reached major)
           elif echo "$msg" | grep -qE '^feat(\(.+\))?:'; then
             [ "$BUMP" != "major" ] && BUMP="minor"
 
-          # fix, perf, refactor = patch (solo si no hemos llegado a minor o major)
+          # fix, perf, refactor = patch (only if we haven't reached minor or major)
           elif echo "$msg" | grep -qE '^(fix|perf|refactor)(\(.+\))?:'; then
             [ "$BUMP" = "none" ] && BUMP="patch"
           fi
-          # chore, docs, ci, test, style, build → BUMP queda igual (none)
+          # chore, docs, ci, test, style, build → BUMP remains the same (none)
         done <<< "$COMMITS"
 
         echo "Bump type: $BUMP"
 
-        # Calcular nuevo tag
+        # Calculate new tag
         if [ "$BUMP" = "none" ]; then
           echo "No release needed."
           echo "tag_version=" >> $GITHUB_OUTPUT
@@ -79,13 +79,13 @@ runs:
         echo "tag_version=$NEXT_TAG" >> $GITHUB_OUTPUT
         echo "bump_type=$BUMP" >> $GITHUB_OUTPUT
 
-        # Generar entradas de changelog
+        # Generate changelog entries
         if [ -z "$LAST_TAG" ]; then
           CHANGELOG=$(git log --pretty=format:"* %s (%h)" HEAD)
         else
           CHANGELOG=$(git log --pretty=format:"* %s (%h)" ${LAST_TAG}..HEAD)
         fi
-        # Multiline output para GITHUB_OUTPUT
+        # Multiline output for GITHUB_OUTPUT
         echo "changelog_entries<<EOF" >> $GITHUB_OUTPUT
         echo "$CHANGELOG" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
