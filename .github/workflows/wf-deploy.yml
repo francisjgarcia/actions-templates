@@ -1,0 +1,178 @@
+name: Deploy (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      containers:
+        required: true
+        type: string
+        description: 'JSON array with container configurations'
+        # Architecture expected for `containers` input:
+        # [
+        #   {
+        #     "name": "app",
+        #     "image": "ghcr.io/org/repo:v1.0.0",
+        #     "network": "my-network",
+        #     "ports": ["8080:80"],
+        #     "volumes": ["/data:/app/data"],
+        #     "healthcheck_url": "http://localhost:8080/health",
+        #     "memory_limit": "512m",
+        #     "memory_reservation": "256m",
+        #     "env_vars": {
+        #       "ENV_VAR_1": "value1",
+        #       "ENV_VAR_2": "value2"
+        #     },
+        #     "extra_networks": ["extra-network-1", "extra-network-2"]
+        #   }
+        # ]
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    environment: production
+    if: inputs.tag_version != ''
+    permissions:
+      packages: read
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create networks if not exist
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+
+          # Recopilar todas las networks (principales y extra) sin duplicados
+          ALL_NETWORKS=$(echo "$CONTAINERS" | jq -r '
+            [.[].network, (.[].extra_networks // []) []] | unique | .[]
+          ')
+
+          for NETWORK in $ALL_NETWORKS; do
+            if ! docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
+              echo "Creating network: $NETWORK"
+              docker network create "$NETWORK"
+            else
+              echo "Network already exists: $NETWORK"
+            fi
+          done
+
+      - name: Deploy containers
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
+          echo "Deploying $CONTAINER_COUNT container(s)..."
+
+          echo "$CONTAINERS" | jq -c '.[]' | while read -r CONTAINER; do
+            NAME=$(echo "$CONTAINER"             | jq -r '.name')
+            IMAGE=$(echo "$CONTAINER"            | jq -r '.image')
+            NETWORK=$(echo "$CONTAINER"          | jq -r '.network')
+            MEMORY=$(echo "$CONTAINER"           | jq -r '.memory_limit // "512m"')
+            MEMORY_RES=$(echo "$CONTAINER"       | jq -r '.memory_reservation // "256m"')
+            HEALTHCHECK=$(echo "$CONTAINER"      | jq -r '.healthcheck_url // ""')
+            RESTART=$(echo "$CONTAINER"          | jq -r '.restart_policy // "always"')
+
+            echo "--- Deploying container: $NAME ---"
+
+            # Pull imagen
+            docker pull "$IMAGE"
+
+            # Remove existing container if it exists (running or not)
+            if docker ps -a --format '{{.Names}}' | grep -q "^${NAME}$"; then
+              echo "Removing existing container: $NAME"
+              docker rm -f "$NAME"
+            fi
+
+            # Build port flags
+            PORTS_FLAGS=""
+            while IFS= read -r PORT; do
+              [ -n "$PORT" ] && PORTS_FLAGS="$PORTS_FLAGS -p $PORT"
+            done < <(echo "$CONTAINER" | jq -r '(.ports // [])[]')
+
+            # Build volume flags
+            VOLUMES_FLAGS=""
+            while IFS= read -r VOLUME; do
+              [ -n "$VOLUME" ] && VOLUMES_FLAGS="$VOLUMES_FLAGS -v $VOLUME"
+            done < <(echo "$CONTAINER" | jq -r '(.volumes // [])[]')
+
+            # Build environment variable flags
+            ENV_FLAGS=""
+            while IFS= read -r ENV_LINE; do
+              [ -n "$ENV_LINE" ] && ENV_FLAGS="$ENV_FLAGS -e $ENV_LINE"
+            done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
+
+            # Build healthcheck flags
+            HEALTHCHECK_FLAGS=""
+            if [ -n "$HEALTHCHECK" ]; then
+              HEALTHCHECK_FLAGS="
+                --health-cmd='curl -f $HEALTHCHECK || exit 1'
+                --health-start-period=30s
+                --health-interval=1h
+                --health-timeout=10s
+                --health-retries=3
+              "
+            fi
+
+            # Run container
+            docker run -d \
+              --name "$NAME" \
+              --hostname "$NAME" \
+              --network "$NETWORK" \
+              --memory="$MEMORY" \
+              --memory-reservation="$MEMORY_RES" \
+              --restart "$RESTART" \
+              $PORTS_FLAGS \
+              $VOLUMES_FLAGS \
+              $ENV_FLAGS \
+              $HEALTHCHECK_FLAGS \
+              "$IMAGE"
+
+            echo "Container $NAME deployed successfully."
+
+            # Connect to additional networks
+            while IFS= read -r EXTRA_NET; do
+              if [ -n "$EXTRA_NET" ]; then
+                echo "Connecting $NAME to extra network: $EXTRA_NET"
+                docker network connect "$EXTRA_NET" "$NAME"
+              fi
+            done < <(echo "$CONTAINER" | jq -r '(.extra_networks // [])[]')
+
+          done
+
+      - name: Remove old images
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          echo "$CONTAINERS" | jq -r '.[].image | split(":")[0]' | sort -u | while read -r IMAGE_BASE; do
+            echo "Cleaning old images for: $IMAGE_BASE"
+            for IMAGE_ID in $(docker images -q "$IMAGE_BASE" | tail -n +2); do
+              docker rmi -f "$IMAGE_ID" || true
+            done
+          done
+
+      - name: Deploy summary
+        if: always()
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          echo "## Deploy summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Container | Image | Network | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "$CONTAINERS" | jq -c '.[]' | while read -r CONTAINER; do
+            NAME=$(echo "$CONTAINER"    | jq -r '.name')
+            IMAGE=$(echo "$CONTAINER"   | jq -r '.image')
+            NETWORK=$(echo "$CONTAINER" | jq -r '.network')
+            if docker ps --format '{{.Names}}' | grep -q "^${NAME}$"; then
+              STATUS="✅ Running"
+            else
+              STATUS="❌ Failed"
+            fi
+            echo "| \`$NAME\` | \`$IMAGE\` | \`$NETWORK\` | $STATUS |" >> $GITHUB_STEP_SUMMARY
+          done
