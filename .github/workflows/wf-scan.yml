@@ -1,0 +1,110 @@
+name: Scan (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      fail_on_critical:
+        required: false
+        type: boolean
+        default: true
+      severity_cutoff:
+        required: false
+        type: string
+        default: 'critical'
+        description: 'Minimum severity to fail the build: negligible, low, medium, high, critical'
+      only_fixed:
+        required: false
+        type: boolean
+        default: true
+        description: 'Only report vulnerabilities that have a fix available'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    environment: production
+    if: inputs.tag_version != ''
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Download docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load docker image
+        run: docker load -i /tmp/docker-image.tar
+
+      - name: Scan image (SARIF)
+        id: scan_sarif
+        uses: anchore/scan-action@v3
+        with:
+          image: ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}
+          fail-build: false
+          only-fixed: ${{ inputs.only_fixed }}
+          severity-cutoff: ${{ inputs.severity_cutoff }}
+          output-format: sarif
+
+      - name: Scan image (table)
+        id: scan_table
+        uses: anchore/scan-action@v3
+        with:
+          image: ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}
+          fail-build: ${{ inputs.fail_on_critical }}
+          only-fixed: ${{ inputs.only_fixed }}
+          severity-cutoff: ${{ inputs.severity_cutoff }}
+          output-format: table
+
+      - name: Upload SARIF to GitHub Security tab
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ${{ steps.scan_sarif.outputs.sarif }}
+          category: container-scanning
+
+      - name: Scan summary
+        if: always()
+        run: |
+          echo "## Vulnerability scan summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Input | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Image | \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity cutoff | \`${{ inputs.severity_cutoff }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Only fixed | \`${{ inputs.only_fixed }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Fail on critical | \`${{ inputs.fail_on_critical }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          SARIF_FILE="${{ steps.scan_sarif.outputs.sarif }}"
+          if [ -f "$SARIF_FILE" ] && grep -q '"ruleId":' "$SARIF_FILE"; then
+            CRITICAL=$(jq '[.runs[].results[] | select(.properties.severity == "critical")] | length' "$SARIF_FILE")
+            HIGH=$(jq '[.runs[].results[] | select(.properties.severity == "high")] | length' "$SARIF_FILE")
+            MEDIUM=$(jq '[.runs[].results[] | select(.properties.severity == "medium")] | length' "$SARIF_FILE")
+            LOW=$(jq '[.runs[].results[] | select(.properties.severity == "low")] | length' "$SARIF_FILE")
+            TOTAL=$(jq '[.runs[].results[]] | length' "$SARIF_FILE")
+
+            echo "### Summary" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔴 Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟠 High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🟡 Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🔵 Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+            echo "| **Total** | **$TOTAL** |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Vulnerabilities detail" >> $GITHUB_STEP_SUMMARY
+            echo "| Rule ID | Severity | Description |" >> $GITHUB_STEP_SUMMARY
+            echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+            jq -r '.runs[].results[] | "| \(.ruleId) | \(.properties.severity) | \(.message.text) |"' "$SARIF_FILE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> Full report available in the [Security tab](https://github.com/${{ inputs.github_repository }}/security/code-scanning)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "### ✅ No vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+          fi

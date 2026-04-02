@@ -1,58 +1,61 @@
 name: Release (Reusable)
+
 on:
   workflow_call:
     inputs:
-      tag_version:        { required: true,  type: string }
-      bump_type:          { required: true,  type: string }
-      github_repository:  { required: true,  type: string }
-      changelog_entries:  { required: true,  type: string }
+      tag_version:
+        required: true
+        type: string
+      bump_type:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      changelog_entries:
+        required: true
+        type: string
 
 jobs:
   release:
     runs-on: ubuntu-latest
     environment: production
-    # If calculate-tag returned empty tag (chore/docs/ci), we skip the release
     if: inputs.tag_version != ''
+    permissions:
+      contents: write
 
     steps:
-      - uses: actions/checkout@v6.0.2
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Update CHANGELOG.md
-        env:
-          TAG_VERSION: ${{ inputs.tag_version }}
-          ENTRIES: ${{ inputs.changelog_entries }}
-          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
         run: |
           TEMP=$(mktemp)
           echo "# Changelog" > $TEMP
           echo "" >> $TEMP
-          echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))" >> $TEMP
+          echo "## [${{ inputs.tag_version }}](https://github.com/${{ inputs.github_repository }}/releases/tag/${{ inputs.tag_version }}) ($(date +'%Y-%m-%d'))" >> $TEMP
           echo "" >> $TEMP
-          echo "$ENTRIES" >> $TEMP
+          echo "${{ inputs.changelog_entries }}" >> $TEMP
           echo "" >> $TEMP
-          # Preserve previous content (without the title line)
           [ -f CHANGELOG.md ] && sed '/^# Changelog$/d' CHANGELOG.md >> $TEMP
           mv $TEMP CHANGELOG.md
 
-      - name: Commit & push CHANGELOG
+      - name: Commit and push CHANGELOG
         uses: qoomon/actions--create-commit@v1.2.1
         with:
           message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
           skip-empty: true
 
       - name: Push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: git push
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2.0.8
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
           tag_name: ${{ inputs.tag_version }}
-          name: "Release ${{ inputs.tag_version }} (${{ inputs.bump_type }})"
+          name: "Release ${{ inputs.tag_version }}"
           prerelease: false
           draft: false
           generate_release_notes: true
@@ -67,7 +70,11 @@ jobs:
 
       - name: Release summary
         run: |
-          echo "## Release ${{ inputs.tag_version }}" >> $GITHUB_STEP_SUMMARY
-          echo "**Bump:** \`${{ inputs.bump_type }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "## Release summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Field | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Release | [${{ inputs.tag_version }}](https://github.com/${{ inputs.github_repository }}/releases/tag/${{ inputs.tag_version }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bump type | \`${{ inputs.bump_type }}\` |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changelog" >> $GITHUB_STEP_SUMMARY
           echo "${{ inputs.changelog_entries }}" >> $GITHUB_STEP_SUMMARY

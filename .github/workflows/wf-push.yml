@@ -1,0 +1,52 @@
+name: Push (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    environment: production
+    if: inputs.tag_version != ''
+    permissions:
+      packages: write
+
+    steps:
+      - name: Download docker image
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load docker image
+        run: docker load -i /tmp/docker-image.tar
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker push ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}
+          docker tag \
+            ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }} \
+            ghcr.io/${{ inputs.github_repository }}:latest
+          docker push ghcr.io/${{ inputs.github_repository }}:latest
+
+      - name: Push summary
+        run: |
+          echo "## Push summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Tag | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` | ✅ Pushed |" >> $GITHUB_STEP_SUMMARY
+          echo "| \`ghcr.io/${{ inputs.github_repository }}:latest\` | ✅ Pushed |" >> $GITHUB_STEP_SUMMARY
