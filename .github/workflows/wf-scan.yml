@@ -35,7 +35,7 @@ jobs:
 
     steps:
       - name: Download docker image
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v6.0.2
         with:
           name: docker-image
           path: /tmp
@@ -45,7 +45,7 @@ jobs:
 
       - name: Scan image (SARIF)
         id: scan_sarif
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7.4.0
         with:
           image: ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}
           fail-build: false
@@ -55,7 +55,7 @@ jobs:
 
       - name: Scan image (table)
         id: scan_table
-        uses: anchore/scan-action@v3
+        uses: anchore/scan-action@v7.4.0
         with:
           image: ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}
           fail-build: ${{ inputs.fail_on_critical }}
