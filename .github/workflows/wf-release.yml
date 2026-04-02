@@ -1,0 +1,75 @@
+name: Release (Reusable)
+on:
+  workflow_call:
+    inputs:
+      tag_version:        { required: true,  type: string }
+      bump_type:          { required: true,  type: string }
+      github_repository:  { required: true,  type: string }
+      changelog_entries:  { required: true,  type: string }
+    secrets:
+      GITHUB_TOKEN:       { required: true }
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    # Si calculate-tag devolvió tag vacío (chore/docs/ci), saltamos la release
+    if: inputs.tag_version != ''
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Update CHANGELOG.md
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+          ENTRIES: ${{ inputs.changelog_entries }}
+          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
+        run: |
+          TEMP=$(mktemp)
+          echo "# Changelog" > $TEMP
+          echo "" >> $TEMP
+          echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))" >> $TEMP
+          echo "" >> $TEMP
+          echo "$ENTRIES" >> $TEMP
+          echo "" >> $TEMP
+          # Preservar contenido anterior (sin la línea del título)
+          [ -f CHANGELOG.md ] && sed '/^# Changelog$/d' CHANGELOG.md >> $TEMP
+          mv $TEMP CHANGELOG.md
+
+      - name: Commit & push CHANGELOG
+        uses: qoomon/actions--create-commit@v1.2.1
+        with:
+          message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
+          skip-empty: true
+
+      - name: Push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: git push
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2.0.8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ inputs.tag_version }}
+          name: "Release ${{ inputs.tag_version }} (${{ inputs.bump_type }})"
+          prerelease: false
+          draft: false
+          generate_release_notes: true
+          body: |
+            **Bump type:** `${{ inputs.bump_type }}`
+
+            <details>
+              <summary>Changelog</summary>
+
+              ${{ inputs.changelog_entries }}
+            </details>
+
+      - name: Release summary
+        run: |
+          echo "## Release ${{ inputs.tag_version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Bump:** \`${{ inputs.bump_type }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "${{ inputs.changelog_entries }}" >> $GITHUB_STEP_SUMMARY

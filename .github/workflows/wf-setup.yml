@@ -1,0 +1,59 @@
+name: Setup (Reusable)
+on:
+  workflow_call:
+    secrets:
+      GITHUB_TOKEN:
+        required: true
+    outputs:
+      tag_version:        { value: "${{ jobs.setup.outputs.tag_version }}" }
+      bump_type:          { value: "${{ jobs.setup.outputs.bump_type }}" }
+      repo_name:          { value: "${{ jobs.setup.outputs.repo_name }}" }
+      repo_description:   { value: "${{ jobs.setup.outputs.repo_description }}" }
+      author_name:        { value: "${{ jobs.setup.outputs.author_name }}" }
+      author_email:       { value: "${{ jobs.setup.outputs.author_email }}" }
+      created_at:         { value: "${{ jobs.setup.outputs.created_at }}" }
+      changelog_entries:  { value: "${{ jobs.setup.outputs.changelog_entries }}" }
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    environment: production
+    outputs:
+      tag_version:       ${{ steps.tag.outputs.tag_version }}
+      bump_type:         ${{ steps.tag.outputs.bump_type }}
+      repo_name:         ${{ steps.vars.outputs.repo_name }}
+      repo_description:  ${{ steps.vars.outputs.repo_description }}
+      author_name:       ${{ steps.vars.outputs.author_name }}
+      author_email:      ${{ steps.vars.outputs.author_email }}
+      created_at:        ${{ steps.vars.outputs.created_at }}
+      changelog_entries: ${{ steps.tag.outputs.changelog_entries }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Calculate tag
+        id: tag
+        uses: francisjgarcia/actions-templates/actions/calculate-tag@main
+
+      - name: Set variables
+        id: vars
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "repo_name=$(echo ${{ github.repository }} | awk -F/ '{print $2}')" >> $GITHUB_OUTPUT
+          echo "repo_description=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }} | jq -r '.description')" >> $GITHUB_OUTPUT
+          echo "author_name=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
+          echo "author_email=$(git log -1 --pretty=format:'%ae')" >> $GITHUB_OUTPUT
+          echo "created_at=$(date --rfc-3339=seconds)" >> $GITHUB_OUTPUT
+
+      - name: Setup summary
+        run: |
+          echo "## Setup summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Variable | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| Bump type | \`${{ steps.tag.outputs.bump_type }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Next tag | \`${{ steps.tag.outputs.tag_version }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Author | ${{ steps.vars.outputs.author_name }} |" >> $GITHUB_STEP_SUMMARY
