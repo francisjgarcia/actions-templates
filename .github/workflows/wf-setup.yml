@@ -1,9 +1,6 @@
 name: Setup (Reusable)
 on:
   workflow_call:
-    secrets:
-      GITHUB_TOKEN:
-        required: true
     outputs:
       tag_version:        { value: "${{ jobs.setup.outputs.tag_version }}" }
       bump_type:          { value: "${{ jobs.setup.outputs.bump_type }}" }

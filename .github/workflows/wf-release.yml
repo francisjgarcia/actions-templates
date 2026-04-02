@@ -6,8 +6,6 @@ on:
       bump_type:          { required: true,  type: string }
       github_repository:  { required: true,  type: string }
       changelog_entries:  { required: true,  type: string }
-    secrets:
-      GITHUB_TOKEN:       { required: true }
 
 jobs:
   release:
