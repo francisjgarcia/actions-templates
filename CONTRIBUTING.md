@@ -11,6 +11,9 @@ propose changes, report issues, and submit pull requests.
   - [Getting started](#getting-started)
   - [How to contribute](#how-to-contribute)
   - [Conventional Commits](#conventional-commits)
+  - [Branch strategy](#branch-strategy)
+  - [Pull request process](#pull-request-process)
+  - [Local validation](#local-validation)
 
 ---
 
@@ -25,7 +28,7 @@ By participating in this project you agree to abide by the [Code of Conduct](COD
 1. Fork the repository
 2. Clone your fork:
 ```bash
-   git clone https://github.com/YOUR_USERNAME/actions-templates.git
+   git clone https://github.com/francisjgarcia/actions-templates.git
    cd actions-templates
 ```
 3. Create a branch for your change (see [Branch strategy](#branch-strategy))
