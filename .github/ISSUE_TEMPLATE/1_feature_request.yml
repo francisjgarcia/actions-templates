@@ -1,0 +1,56 @@
+name: "\U0001F680 Feature request"
+description: Suggest a new workflow, action or capability.
+title: "feat: <short description>"
+labels: ["enhancement"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to improve this template library? We'd love to hear it!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or motivation
+      description: What problem does this feature solve? What is the use case?
+      placeholder: "I always have to manually do X because the template doesn't support..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the feature you would like to see added.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Have you considered any alternative solutions or workarounds?
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Scope
+      description: Where should this feature be added?
+      options:
+        - New reusable workflow
+        - Existing reusable workflow
+        - New composite action
+        - Existing composite action
+        - Documentation
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other context, mockups or examples.

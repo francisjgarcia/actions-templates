@@ -1,0 +1,72 @@
+name: "\U0001F41B Bug report"
+description: Report a bug or unexpected behavior in a workflow or action.
+title: "fix: <short description>"
+labels: ["bug", "triage"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill in the form below as completely as possible.
+
+  - type: input
+    id: workflow
+    attributes:
+      label: Affected workflow or action
+      description: Which workflow or composite action is affected?
+      placeholder: "e.g. wf-build.yml, actions/calculate-tag"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug description
+      description: A clear and concise description of what the bug is.
+      placeholder: "When I call wf-build.yml with input X, the job fails with error Y..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Step-by-step instructions to reproduce the issue.
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or error output
+      description: Paste any relevant logs from the GitHub Actions run.
+      render: shell
+
+  - type: input
+    id: ref
+    attributes:
+      label: Template version (ref)
+      description: Which ref are you using to call the template?
+      placeholder: "e.g. @main, @v1.2.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Any other context, screenshots or information that may help.

@@ -1,0 +1,54 @@
+name: "\U000026A1 Performance issue"
+description: Report a workflow that is slow or uses excessive resources.
+title: "perf: <short description>"
+labels: ["performance"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us identify and fix performance bottlenecks in the templates.
+
+  - type: input
+    id: workflow
+    attributes:
+      label: Affected workflow or action
+      placeholder: "e.g. wf-build.yml"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Performance issue description
+      description: Describe the performance problem you are experiencing.
+    validations:
+      required: true
+
+  - type: input
+    id: duration
+    attributes:
+      label: Observed duration
+      placeholder: "e.g. wf-build takes 15 minutes"
+    validations:
+      required: true
+
+  - type: input
+    id: expected_duration
+    attributes:
+      label: Expected duration
+      placeholder: "e.g. should take under 5 minutes"
+
+  - type: input
+    id: run_url
+    attributes:
+      label: GitHub Actions run URL
+      description: Link to the slow run if available.
+      placeholder: "https://github.com/..."
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

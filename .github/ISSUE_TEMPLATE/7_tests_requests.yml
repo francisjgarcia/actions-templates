@@ -1,0 +1,41 @@
+name: "\U0001F9EA Tests request"
+description: Request new tests or report missing test coverage for a workflow or action.
+title: "test: <short description>"
+labels: ["tests"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Help us improve the reliability of the templates by requesting better test coverage!
+
+  - type: input
+    id: target
+    attributes:
+      label: Workflow or action to test
+      placeholder: "e.g. wf-deploy.yml, actions/calculate-tag"
+    validations:
+      required: true
+
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Test scenario
+      description: Describe the scenario or edge case that should be tested.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected outcome
+      description: What should happen when the scenario is executed correctly?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

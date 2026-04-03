@@ -1,0 +1,52 @@
+name: "\U0001F4DA Documentation update"
+description: Report missing, outdated or incorrect documentation.
+title: "docs: <short description>"
+labels: ["documentation"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Good documentation is as important as good code. Help us improve it!
+
+  - type: input
+    id: file
+    attributes:
+      label: Affected documentation file
+      placeholder: "e.g. README.md, docs/usage/python.md"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type of documentation issue
+      options:
+        - Missing documentation
+        - Outdated documentation
+        - Incorrect documentation
+        - Unclear documentation
+        - Typo or formatting issue
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: What is wrong or missing in the documentation?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested content
+      description: If you have a suggestion for the correct or missing content, add it here.
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context

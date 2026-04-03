@@ -1,0 +1,51 @@
+name: "\U0001F9F9 Refactor request"
+description: Suggest a code refactor for clarity, maintainability or best practices.
+title: "refactor: <short description>"
+labels: ["refactor"]
+assignees:
+  - francisjgarcia
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Spotted something that could be cleaner or better structured? Let us know!
+
+  - type: input
+    id: target
+    attributes:
+      label: Workflow or action to refactor
+      placeholder: "e.g. wf-release.yml"
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: Current code or structure
+      description: Describe or paste the current code that should be refactored.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed
+    attributes:
+      label: Proposed refactor
+      description: Describe or paste the proposed cleaner version.
+      render: yaml
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason
+      description: Why is this refactor needed? (readability, maintainability, best practices...)
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
