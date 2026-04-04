@@ -36,7 +36,7 @@ with automatic semantic versioning based on [Conventional Commits](https://www.c
 - **Multi-container deploy** support via JSON configuration
 - **PR title validation** enforcing Conventional Commits format
 - **Workflow linting** with actionlint and yamllint
-- **Language agnostic** — works with Python, Node.js, Go and any containerized app
+- **Language agnostic** — works with Python, Go or any containerized app
 - **Trunk Based Development** — single `main` branch, no `develop` branch needed
 
 ---
