@@ -1,13 +1,18 @@
 # Changelog
 
-## [v0.3.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.3.0) (2026-04-04)
+## [v0.4.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.4.0) (2026-04-04)
 
 
 ### ✨ New features
 
+* feat(workflows): add YAML front matter to workflow files ([3203603](https://github.com/francisjgarcia/actions-templates/commit/3203603)) — Francis J. García
+
+
+
+## [v0.3.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.3.0) (2026-04-04)
+### ✨ New features
+
 * feat(workflows): update `wf-release` to enhance CHANGELOG.md handling ([c4aaf34](https://github.com/francisjgarcia/actions-templates/commit/c4aaf34)) — Francis J. García
-
-
 
 All notable changes to this project will be documented in this file.
 
