@@ -62,7 +62,6 @@ jobs:
               colons:
                 max-spaces-after: -1
               braces:
-                forbid-flow-sequences: false
                 min-spaces-inside: 0
                 max-spaces-inside: 1
               truthy:
