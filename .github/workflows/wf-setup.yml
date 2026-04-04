@@ -43,7 +43,7 @@ jobs:
           {
             echo "repo_name=${GITHUB_REPOSITORY#*/}"
             echo "repo_description=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              https://api.github.com/repos/${GITHUB_REPOSITORY} | jq -r '.description // ""')"
+              "https://api.github.com/repos/${GITHUB_REPOSITORY}" | jq -r '.description // ""')"
             echo "author_name=$(git log -1 --pretty=format:'%an')"
             echo "author_email=$(git log -1 --pretty=format:'%ae')"
             echo "created_at=$(date --rfc-3339=seconds)"
