@@ -1,8 +1,19 @@
 # Changelog
 
+## [v0.5.4](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.4) (2026-04-04)
+
+
+### 🐛 Bug fixes
+
+* fix(README): update language support in key features section ([154c6a4](https://github.com/francisjgarcia/actions-templates/commit/154c6a4)) — Francis J. García
+
+### 🔧 Other changes
+
+* Merge pull request #3 from francisjgarcia/test ([741534c](https://github.com/francisjgarcia/actions-templates/commit/741534c)) — Francis J. García
+
+
+
 ## [v0.5.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.3) (2026-04-04)
-
-
 ### 🐛 Bug fixes
 
 * fix(workflows): update yamllint summary to use inline paths ([bb013b0](https://github.com/francisjgarcia/actions-templates/commit/bb013b0)) — Francis J. García
@@ -15,8 +26,6 @@
 ### 🔧 Other changes
 
 * Merge pull request #2 from francisjgarcia/test ([53f3434](https://github.com/francisjgarcia/actions-templates/commit/53f3434)) — Francis J. García
-
-
 
 ## [v0.5.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.2) (2026-04-04)
 ### 🐛 Bug fixes
