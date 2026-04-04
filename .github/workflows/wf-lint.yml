@@ -34,9 +34,9 @@ jobs:
         run: |
           {
             echo "## Lint summary"
-            echo "| Check | Paths | Result |"
-            echo "| --- | --- | --- |"
-            echo "| actionlint | `.github/workflows/` | ✅ Passed |"
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+            echo "| actionlint | ✅ Passed |"
           } >> "$GITHUB_STEP_SUMMARY"
 
   yamllint:
@@ -70,11 +70,9 @@ jobs:
       - name: Yamllint summary
         if: always()
         run: |
-          YAMLLINT_PATHS="${{ inputs.yamllint_paths }}"
-          YAMLLINT_PATHS_INLINE=$(echo "$YAMLLINT_PATHS" | tr '\n' ' ' | sed 's/ $//')
           {
             echo "## Lint summary"
             echo "| Check | Paths | Result |"
             echo "| --- | --- | --- |"
-            echo "| yamllint | \`${YAMLLINT_PATHS_INLINE}\` | ✅ Passed |"
+            echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |"
           } >> "$GITHUB_STEP_SUMMARY"
