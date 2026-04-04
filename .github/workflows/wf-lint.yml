@@ -32,10 +32,12 @@ jobs:
       - name: Actionlint summary
         if: always()
         run: |
-          echo "## Lint summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Paths | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| actionlint | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Lint summary"
+            echo "| Check | Paths | Result |"
+            echo "| --- | --- | --- |"
+            echo "| actionlint | ✅ Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   yamllint:
     name: Lint YAML
@@ -68,7 +70,9 @@ jobs:
       - name: Yamllint summary
         if: always()
         run: |
-          echo "## Lint summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Paths | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Lint summary"
+            echo "| Check | Paths | Result |"
+            echo "| --- | --- | --- |"
+            echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"

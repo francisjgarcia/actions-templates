@@ -40,26 +40,32 @@ jobs:
       - name: Set variables
         id: vars
         run: |
-          echo "repo_name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_OUTPUT
-          echo "repo_description=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/${GITHUB_REPOSITORY} | jq -r '.description // ""')" >> $GITHUB_OUTPUT
-          echo "author_name=$(git log -1 --pretty=format:'%an')" >> $GITHUB_OUTPUT
-          echo "author_email=$(git log -1 --pretty=format:'%ae')" >> $GITHUB_OUTPUT
-          echo "created_at=$(date --rfc-3339=seconds)" >> $GITHUB_OUTPUT
+          {
+            echo "repo_name=${GITHUB_REPOSITORY#*/}"
+            echo "repo_description=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              https://api.github.com/repos/${GITHUB_REPOSITORY} | jq -r '.description // ""')"
+            echo "author_name=$(git log -1 --pretty=format:'%an')"
+            echo "author_email=$(git log -1 --pretty=format:'%ae')"
+            echo "created_at=$(date --rfc-3339=seconds)"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Setup summary
         run: |
-          echo "## Setup summary" >> $GITHUB_STEP_SUMMARY
-          echo "### Output variables" >> $GITHUB_STEP_SUMMARY
-          echo "- Environment: production" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Setup summary"
+            echo "### Output variables"
+            echo "- Environment: production"
+          } >> "$GITHUB_STEP_SUMMARY"
           if [[ -n "${{ steps.tag.outputs.tag_version }}" ]]; then
             TAG_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.tag.outputs.tag_version }}"
-            echo "- Tag version: [${{ steps.tag.outputs.tag_version }}](${TAG_URL})" >> $GITHUB_STEP_SUMMARY
+            echo "- Tag version: [${{ steps.tag.outputs.tag_version }}](${TAG_URL})" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "- Tag version: no release (\`${{ steps.tag.outputs.bump_type }}\` commit)" >> $GITHUB_STEP_SUMMARY
+            echo "- Tag version: no release (\`${{ steps.tag.outputs.bump_type }}\` commit)" >> "$GITHUB_STEP_SUMMARY"
           fi
-          echo "- Repository name: [${{ steps.vars.outputs.repo_name }}](https://github.com/${GITHUB_REPOSITORY})" >> $GITHUB_STEP_SUMMARY
-          echo "- Repository description: ${{ steps.vars.outputs.repo_description }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Author name: ${{ steps.vars.outputs.author_name }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Author email: ${{ steps.vars.outputs.author_email }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Created at: ${{ steps.vars.outputs.created_at }}" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "- Repository name: [${{ steps.vars.outputs.repo_name }}](https://github.com/${GITHUB_REPOSITORY})"
+            echo "- Repository description: ${{ steps.vars.outputs.repo_description }}"
+            echo "- Author name: ${{ steps.vars.outputs.author_name }}"
+            echo "- Author email: ${{ steps.vars.outputs.author_email }}"
+            echo "- Created at: ${{ steps.vars.outputs.created_at }}"
+          } >> "$GITHUB_STEP_SUMMARY"

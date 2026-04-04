@@ -46,8 +46,10 @@ jobs:
 
       - name: Push summary
         run: |
-          echo "## Push summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Tag | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` | ✅ Pushed |" >> $GITHUB_STEP_SUMMARY
-          echo "| \`ghcr.io/${{ inputs.github_repository }}:latest\` | ✅ Pushed |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Push summary"
+            echo "| Tag | Status |"
+            echo "| --- | --- |"
+            echo "| \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` | ✅ Pushed |"
+            echo "| \`ghcr.io/${{ inputs.github_repository }}:latest\` | ✅ Pushed |"
+          } >> "$GITHUB_STEP_SUMMARY"

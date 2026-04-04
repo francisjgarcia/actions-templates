@@ -22,8 +22,10 @@ jobs:
 
     steps:
       - name: Check conventional commit format
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
+          TITLE="$PR_TITLE"
           ALLOWED_TYPES="${{ inputs.allowed_types }}"
           MAX_LENGTH="${{ inputs.max_title_length }}"
 
@@ -39,7 +41,7 @@ jobs:
             echo ""
             echo "Expected format: <type>[optional scope]: <description>"
             echo ""
-            echo "Valid types: $(echo $ALLOWED_TYPES | tr '|' ', ')"
+            echo "Valid types: $(echo "$ALLOWED_TYPES" | tr '|' ', ')"
             echo ""
             echo "Examples:"
             echo "  feat: add new reusable workflow"
@@ -51,21 +53,27 @@ jobs:
 
       - name: PR validation summary
         if: always()
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          TITLE="${{ github.event.pull_request.title }}"
+          TITLE="$PR_TITLE"
           ALLOWED_TYPES="${{ inputs.allowed_types }}"
           MAX_LENGTH="${{ inputs.max_title_length }}"
           PATTERN="^(${ALLOWED_TYPES})(\(.+\))?(!)?: .{1,${MAX_LENGTH}}$"
 
-          echo "## PR validation summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## PR validation summary"
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
           if echo "$TITLE" | grep -qE "$PATTERN"; then
-            echo "| PR title format | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+            echo "| PR title format | ✅ Valid |" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "| PR title format | ❌ Invalid |" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "> **Title:** \`$TITLE\`" >> $GITHUB_STEP_SUMMARY
-            echo "> **Expected:** \`<type>[scope]: <description>\`" >> $GITHUB_STEP_SUMMARY
-            echo "> **Valid types:** \`$(echo $ALLOWED_TYPES | tr '|' ', ')\`" >> $GITHUB_STEP_SUMMARY
+            {
+              echo "| PR title format | ❌ Invalid |"
+              echo ""
+              echo "> **Title:** \`$TITLE\`"
+              echo "> **Expected:** \`<type>[scope]: <description>\`"
+              echo "> **Valid types:** \`$(echo "$ALLOWED_TYPES" | tr '|' ', ')\`"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
