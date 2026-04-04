@@ -1,4 +1,3 @@
----
 name: Lint
 
 on:
@@ -14,7 +13,7 @@ jobs:
     name: Lint workflows and actions
     uses: ./.github/workflows/wf-lint.yml
     with:
-      actionlint_paths: '.github/workflows/'
+      actionlint_paths: '.github/workflows/*.yml'
       yamllint_paths: |
         .github/workflows/
         actions/

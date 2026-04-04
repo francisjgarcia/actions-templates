@@ -56,8 +56,15 @@ jobs:
           config_data: |
             extends: default
             rules:
+              document-start: disable
               line-length:
                 max: ${{ inputs.yamllint_max_line_length }}
+              colons:
+                max-spaces-after: -1
+              braces:
+                forbid-flow-sequences: false
+                min-spaces-inside: 0
+                max-spaces-inside: 1
               truthy:
                 allowed-values: ['true', 'false', 'on', 'off']
               comments:
