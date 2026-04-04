@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
@@ -36,11 +36,9 @@ jobs:
           GITHUB_REPOSITORY: ${{ inputs.github_repository }}
           CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
         run: |
-          # Write changelog entries to a temp file to preserve formatting
           TEMP_ENTRIES=$(mktemp)
           echo "$CHANGELOG_ENTRIES" > "$TEMP_ENTRIES"
 
-          # Build new changelog header
           TEMP_CHANGELOG=$(mktemp)
           echo "# Changelog" > "$TEMP_CHANGELOG"
           echo "" >> "$TEMP_CHANGELOG"
@@ -49,7 +47,6 @@ jobs:
           cat "$TEMP_ENTRIES" >> "$TEMP_CHANGELOG"
           echo "" >> "$TEMP_CHANGELOG"
 
-          # Append previous changelog content preserving history
           if [ -f CHANGELOG.md ]; then
             sed '/^# Changelog$/d' CHANGELOG.md | sed '/^$/N;/^\n$/d' >> "$TEMP_CHANGELOG"
           fi
@@ -60,8 +57,11 @@ jobs:
           echo "CHANGELOG.md updated:"
           cat CHANGELOG.md
 
+      - name: Stage CHANGELOG.md
+        run: git add CHANGELOG.md
+
       - name: Commit and push CHANGELOG.md
-        uses: qoomon/actions--create-commit@v1.2.1
+        uses: qoomon/actions--create-commit@v1.2.3
         with:
           message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
           skip-empty: true
@@ -69,19 +69,40 @@ jobs:
       - name: Push
         run: git push
 
+      - name: Generate AI release notes
+        id: ai_notes
+        uses: actions/github-script@v8.0.0
+        with:
+          script: |
+            const response = await github.rest.repos.generateReleaseNotes({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ inputs.tag_version }}',
+            });
+            return response.data.body;
+          result-encoding: string
+
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2.0.8
+        uses: softprops/action-gh-release@v2.6.1
         with:
           tag_name: ${{ inputs.tag_version }}
           name: "Release ${{ inputs.tag_version }}"
           prerelease: false
           draft: false
-          generate_release_notes: true
+          generate_release_notes: false
           body: |
+            ## 🤖 AI-generated summary
+
+            ${{ steps.ai_notes.outputs.result }}
+
+            ---
+
+            ## 📋 Commit changelog
+
             **Bump type:** `${{ inputs.bump_type }}`
 
             <details>
-              <summary>Changelog</summary>
+              <summary>Changes since last release</summary>
 
               ${{ inputs.changelog_entries }}
             </details>
