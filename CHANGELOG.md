@@ -1,13 +1,18 @@
 # Changelog
 
-## [v0.4.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.4.0) (2026-04-04)
+## [v0.5.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.0) (2026-04-04)
 
 
 ### ✨ New features
 
+* feat(workflows): update linting configuration for YAML files ([762bfe7](https://github.com/francisjgarcia/actions-templates/commit/762bfe7)) — Francis J. García
+
+
+
+## [v0.4.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.4.0) (2026-04-04)
+### ✨ New features
+
 * feat(workflows): add YAML front matter to workflow files ([3203603](https://github.com/francisjgarcia/actions-templates/commit/3203603)) — Francis J. García
-
-
 
 ## [v0.3.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.3.0) (2026-04-04)
 ### ✨ New features
