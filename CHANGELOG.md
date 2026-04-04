@@ -1,13 +1,22 @@
 # Changelog
 
-## [v0.5.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.1) (2026-04-04)
+## [v0.5.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.2) (2026-04-04)
 
 
 ### 🐛 Bug fixes
 
+* fix(docs): remove Node.js usage guide from README.md ([aadd424](https://github.com/francisjgarcia/actions-templates/commit/aadd424)) — Francis J. García
+
+### 🔧 Other changes
+
+* Merge pull request #1 from francisjgarcia/test ([723f214](https://github.com/francisjgarcia/actions-templates/commit/723f214)) — Francis J. García
+
+
+
+## [v0.5.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.1) (2026-04-04)
+### 🐛 Bug fixes
+
 * fix(workflows): remove unnecessary yamllint rule ([50c50ed](https://github.com/francisjgarcia/actions-templates/commit/50c50ed)) — Francis J. García
-
-
 
 ## [v0.5.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.0) (2026-04-04)
 ### ✨ New features
