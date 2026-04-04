@@ -1,0 +1,70 @@
+name: PR validation (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      allowed_types:
+        required: false
+        type: string
+        default: 'feat|fix|docs|chore|refactor|perf|test|ci|style|build'
+        description: 'Pipe-separated list of allowed conventional commit types'
+      max_title_length:
+        required: false
+        type: number
+        default: 100
+        description: 'Maximum allowed length for the PR title description'
+
+jobs:
+  validate-title:
+    name: Validate PR title
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check conventional commit format
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          ALLOWED_TYPES="${{ inputs.allowed_types }}"
+          MAX_LENGTH="${{ inputs.max_title_length }}"
+
+          echo "PR title: $TITLE"
+          echo "Allowed types: $ALLOWED_TYPES"
+
+          PATTERN="^(${ALLOWED_TYPES})(\(.+\))?(!)?: .{1,${MAX_LENGTH}}$"
+
+          if echo "$TITLE" | grep -qE "$PATTERN"; then
+            echo "✅ PR title follows Conventional Commits format."
+          else
+            echo "❌ PR title does not follow Conventional Commits format."
+            echo ""
+            echo "Expected format: <type>[optional scope]: <description>"
+            echo ""
+            echo "Valid types: $(echo $ALLOWED_TYPES | tr '|' ', ')"
+            echo ""
+            echo "Examples:"
+            echo "  feat: add new reusable workflow"
+            echo "  fix(wf-deploy): correct healthcheck flag quoting"
+            echo "  docs: update python usage guide"
+            echo "  feat!: rename tag_version input to version"
+            exit 1
+          fi
+
+      - name: PR validation summary
+        if: always()
+        run: |
+          TITLE="${{ github.event.pull_request.title }}"
+          ALLOWED_TYPES="${{ inputs.allowed_types }}"
+          MAX_LENGTH="${{ inputs.max_title_length }}"
+          PATTERN="^(${ALLOWED_TYPES})(\(.+\))?(!)?: .{1,${MAX_LENGTH}}$"
+
+          echo "## PR validation summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
+          if echo "$TITLE" | grep -qE "$PATTERN"; then
+            echo "| PR title format | ✅ Valid |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "| PR title format | ❌ Invalid |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "> **Title:** \`$TITLE\`" >> $GITHUB_STEP_SUMMARY
+            echo "> **Expected:** \`<type>[scope]: <description>\`" >> $GITHUB_STEP_SUMMARY
+            echo "> **Valid types:** \`$(echo $ALLOWED_TYPES | tr '|' ', ')\`" >> $GITHUB_STEP_SUMMARY
+          fi

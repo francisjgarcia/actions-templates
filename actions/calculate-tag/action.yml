@@ -1,15 +1,15 @@
 name: Calculate next semver tag
-description: Calculate the next semver tag based on conventional commits since the last tag. Outputs the next tag version, the type of bump (major, minor, patch, none) and a list of commits for the changelog.
+description: Calculates the next semver tag using Conventional Commits and generates a grouped changelog
 
 outputs:
   tag_version:
-    description: Next tag (vX.Y.Z) or empty if no release is needed
+    description: Next tag (vX.Y.Z) or empty if no release needed
     value: ${{ steps.calc.outputs.tag_version }}
   bump_type:
     description: major | minor | patch | none
     value: ${{ steps.calc.outputs.bump_type }}
   changelog_entries:
-    description: List of commits for the changelog
+    description: Grouped changelog entries in markdown format
     value: ${{ steps.calc.outputs.changelog_entries }}
 
 runs:
@@ -19,44 +19,34 @@ runs:
       id: calc
       shell: bash
       run: |
-        # Get commits since the last tag (or all if none)
         LAST_TAG=$(git tag -l 'v*' | sort -V | tail -n 1)
         if [ -z "$LAST_TAG" ]; then
-          COMMITS=$(git log --pretty=format:"%s" HEAD)
+          COMMITS=$(git log --pretty=format:"%s|||%h|||%an" HEAD)
           CURRENT="v0.0.0"
         else
-          COMMITS=$(git log --pretty=format:"%s" ${LAST_TAG}..HEAD)
+          COMMITS=$(git log --pretty=format:"%s|||%h|||%an" ${LAST_TAG}..HEAD)
           CURRENT="$LAST_TAG"
         fi
 
         echo "Last tag: $CURRENT"
-        echo "Commits to analyze:"
-        echo "$COMMITS"
 
-        # Classify each commit and keep the highest bump
         BUMP="none"
 
-        while IFS= read -r msg; do
-          [ -z "$msg" ] && continue
+        while IFS= read -r line; do
+          [ -z "$line" ] && continue
+          msg=$(echo "$line" | cut -d'|' -f1)
 
-          # BREAKING CHANGE = major (! in type or footer BREAKING CHANGE:)
           if echo "$msg" | grep -qE '^[a-z]+(\(.+\))?!:' || echo "$msg" | grep -q 'BREAKING CHANGE:'; then
             BUMP="major"
-
-          # feat = minor (only if we haven't reached major)
           elif echo "$msg" | grep -qE '^feat(\(.+\))?:'; then
             [ "$BUMP" != "major" ] && BUMP="minor"
-
-          # fix, perf, refactor = patch (only if we haven't reached minor or major)
           elif echo "$msg" | grep -qE '^(fix|perf|refactor)(\(.+\))?:'; then
             [ "$BUMP" = "none" ] && BUMP="patch"
           fi
-          # chore, docs, ci, test, style, build → BUMP remains the same (none)
         done <<< "$COMMITS"
 
         echo "Bump type: $BUMP"
 
-        # Calculate new tag
         if [ "$BUMP" = "none" ]; then
           echo "No release needed."
           echo "tag_version=" >> $GITHUB_OUTPUT
@@ -79,13 +69,45 @@ runs:
         echo "tag_version=$NEXT_TAG" >> $GITHUB_OUTPUT
         echo "bump_type=$BUMP" >> $GITHUB_OUTPUT
 
-        # Generate changelog entries
-        if [ -z "$LAST_TAG" ]; then
-          CHANGELOG=$(git log --pretty=format:"* %s (%h)" HEAD)
-        else
-          CHANGELOG=$(git log --pretty=format:"* %s (%h)" ${LAST_TAG}..HEAD)
-        fi
-        # Multiline output for GITHUB_OUTPUT
+        # Grouped changelog by commit type
+        BREAKING=""
+        FEATURES=""
+        FIXES=""
+        PERF=""
+        REFACTORS=""
+        OTHERS=""
+
+        while IFS= read -r line; do
+          [ -z "$line" ] && continue
+          msg=$(echo "$line" | cut -d'|' -f1)
+          hash=$(echo "$line" | cut -d'|' -f4)
+          author=$(echo "$line" | cut -d'|' -f7)
+          entry="* ${msg} ([${hash}](https://github.com/${GITHUB_REPOSITORY}/commit/${hash})) — ${author}"
+
+          if echo "$msg" | grep -qE '^[a-z]+(\(.+\))?!:' || echo "$msg" | grep -q 'BREAKING CHANGE:'; then
+            BREAKING="${BREAKING}\n${entry}"
+          elif echo "$msg" | grep -qE '^feat(\(.+\))?:'; then
+            FEATURES="${FEATURES}\n${entry}"
+          elif echo "$msg" | grep -qE '^fix(\(.+\))?:'; then
+            FIXES="${FIXES}\n${entry}"
+          elif echo "$msg" | grep -qE '^perf(\(.+\))?:'; then
+            PERF="${PERF}\n${entry}"
+          elif echo "$msg" | grep -qE '^refactor(\(.+\))?:'; then
+            REFACTORS="${REFACTORS}\n${entry}"
+          else
+            OTHERS="${OTHERS}\n${entry}"
+          fi
+        done <<< "$COMMITS"
+
+        # Build grouped changelog
+        CHANGELOG=""
+        [ -n "$BREAKING" ]  && CHANGELOG="${CHANGELOG}\n### ⚠️ Breaking changes\n${BREAKING}\n"
+        [ -n "$FEATURES" ]  && CHANGELOG="${CHANGELOG}\n### ✨ New features\n${FEATURES}\n"
+        [ -n "$FIXES" ]     && CHANGELOG="${CHANGELOG}\n### 🐛 Bug fixes\n${FIXES}\n"
+        [ -n "$PERF" ]      && CHANGELOG="${CHANGELOG}\n### ⚡ Performance improvements\n${PERF}\n"
+        [ -n "$REFACTORS" ] && CHANGELOG="${CHANGELOG}\n### ♻️ Refactors\n${REFACTORS}\n"
+        [ -n "$OTHERS" ]    && CHANGELOG="${CHANGELOG}\n### 🔧 Other changes\n${OTHERS}\n"
+
         echo "changelog_entries<<EOF" >> $GITHUB_OUTPUT
-        echo "$CHANGELOG" >> $GITHUB_OUTPUT
+        echo -e "$CHANGELOG" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT

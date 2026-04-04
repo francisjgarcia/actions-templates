@@ -1,0 +1,69 @@
+name: Lint (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      actionlint_paths:
+        required: false
+        type: string
+        default: '.github/workflows/'
+        description: 'Space-separated list of paths to lint with actionlint'
+      yamllint_paths:
+        required: false
+        type: string
+        default: '.github/workflows/'
+        description: 'Newline-separated list of paths to lint with yamllint'
+      yamllint_max_line_length:
+        required: false
+        type: number
+        default: 180
+        description: 'Maximum line length for yamllint'
+
+jobs:
+  actionlint:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.7.12
+        with:
+          args: -color ${{ inputs.actionlint_paths }}
+
+      - name: Actionlint summary
+        if: always()
+        run: |
+          echo "## Lint summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Paths | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          echo "| actionlint | \`${{ inputs.actionlint_paths }}\` | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+
+  yamllint:
+    name: Lint YAML
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6.0.2
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3.1.1
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: ${{ inputs.yamllint_max_line_length }}
+              truthy:
+                allowed-values: ['true', 'false', 'on', 'off']
+              comments:
+                min-spaces-from-content: 1
+          file_or_dir: ${{ inputs.yamllint_paths }}
+
+      - name: Yamllint summary
+        if: always()
+        run: |
+          echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
