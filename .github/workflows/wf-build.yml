@@ -77,10 +77,12 @@ jobs:
 
       - name: Build summary
         run: |
-          echo "## Build summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Input | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| Image | \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Dockerfile | \`${{ inputs.dockerfile }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Platform | \`${{ inputs.platform }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Created at | \`${{ inputs.created_at }}\` |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Build summary"
+            echo "| Input | Value |"
+            echo "| --- | --- |"
+            echo "| Image | \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` |"
+            echo "| Dockerfile | \`${{ inputs.dockerfile }}\` |"
+            echo "| Platform | \`${{ inputs.platform }}\` |"
+            echo "| Created at | \`${{ inputs.created_at }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -82,41 +82,47 @@ jobs:
       - name: Tests summary
         if: always()
         run: |
-          echo "## Tests summary" >> $GITHUB_STEP_SUMMARY
+          echo "## Tests summary" >> "$GITHUB_STEP_SUMMARY"
 
           if ${{ inputs.flake8_enabled }}; then
-            echo "### flake8" >> $GITHUB_STEP_SUMMARY
+            echo "### flake8" >> "$GITHUB_STEP_SUMMARY"
             if [ ! -f result_flake8.log ] || [ ! -s result_flake8.log ]; then
-              echo "✅ No flake8 errors found." >> $GITHUB_STEP_SUMMARY
+              echo "✅ No flake8 errors found." >> "$GITHUB_STEP_SUMMARY"
             else
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              cat result_flake8.log >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
+              {
+                echo '```'
+                cat result_flake8.log
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
           if ${{ inputs.pytest_enabled }}; then
-            echo "### pytest" >> $GITHUB_STEP_SUMMARY
+            echo "### pytest" >> "$GITHUB_STEP_SUMMARY"
             if [ ! -f result_pytest.log ]; then
-              echo "No pytest results found." >> $GITHUB_STEP_SUMMARY
+              echo "No pytest results found." >> "$GITHUB_STEP_SUMMARY"
             else
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              cat result_pytest.log >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
+              {
+                echo '```'
+                cat result_pytest.log
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
           if [[ -n "${{ inputs.test_command }}" ]]; then
-            echo "### Custom tests" >> $GITHUB_STEP_SUMMARY
+            echo "### Custom tests" >> "$GITHUB_STEP_SUMMARY"
             if [ ! -f result_custom.log ]; then
-              echo "No custom test results found." >> $GITHUB_STEP_SUMMARY
+              echo "No custom test results found." >> "$GITHUB_STEP_SUMMARY"
             else
-              echo '```' >> $GITHUB_STEP_SUMMARY
-              cat result_custom.log >> $GITHUB_STEP_SUMMARY
-              echo '```' >> $GITHUB_STEP_SUMMARY
+              {
+                echo '```'
+                cat result_custom.log
+                echo '```'
+              } >> "$GITHUB_STEP_SUMMARY"
             fi
           fi
 
           if ! ${{ inputs.flake8_enabled }} && ! ${{ inputs.pytest_enabled }} && [[ -z "${{ inputs.test_command }}" ]]; then
-            echo "ℹ️ No tests configured for this repository." >> $GITHUB_STEP_SUMMARY
+            echo "ℹ️ No tests configured for this repository." >> "$GITHUB_STEP_SUMMARY"
           fi

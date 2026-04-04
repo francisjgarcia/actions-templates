@@ -158,9 +158,11 @@ jobs:
         if: always()
         run: |
           CONTAINERS='${{ inputs.containers }}'
-          echo "## Deploy summary" >> $GITHUB_STEP_SUMMARY
-          echo "| Container | Image | Network | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "| --- | --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
+          {
+            echo "## Deploy summary"
+            echo "| Container | Image | Network | Status |"
+            echo "| --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
           echo "$CONTAINERS" | jq -c '.[]' | while read -r CONTAINER; do
             NAME=$(echo "$CONTAINER"    | jq -r '.name')
             IMAGE=$(echo "$CONTAINER"   | jq -r '.image')
@@ -170,5 +172,5 @@ jobs:
             else
               STATUS="❌ Failed"
             fi
-            echo "| \`$NAME\` | \`$IMAGE\` | \`$NETWORK\` | $STATUS |" >> $GITHUB_STEP_SUMMARY
+            echo "| \`$NAME\` | \`$IMAGE\` | \`$NETWORK\` | $STATUS |" >> "$GITHUB_STEP_SUMMARY"
           done
