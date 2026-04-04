@@ -1,8 +1,24 @@
 # Changelog
 
+## [v0.5.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.3) (2026-04-04)
+
+
+### 🐛 Bug fixes
+
+* fix(workflows): update yamllint summary to use inline paths ([bb013b0](https://github.com/francisjgarcia/actions-templates/commit/bb013b0)) — Francis J. García
+* fix(workflows): simplify lint summary output ([67db083](https://github.com/francisjgarcia/actions-templates/commit/67db083)) — Francis J. García
+* fix(workflows): update lint summary to include paths ([28b3eed](https://github.com/francisjgarcia/actions-templates/commit/28b3eed)) — Francis J. García
+* fix(workflows): correct API URL formatting for repo description retrieval ([6b53a92](https://github.com/francisjgarcia/actions-templates/commit/6b53a92)) — Francis J. García
+* fix(workflows): simplify summary generation in multiple workflow files ([4287357](https://github.com/francisjgarcia/actions-templates/commit/4287357)) — Francis J. García
+* fix(workflows): remove actionlint paths input and simplify summary ([a3c78f7](https://github.com/francisjgarcia/actions-templates/commit/a3c78f7)) — Francis J. García
+
+### 🔧 Other changes
+
+* Merge pull request #2 from francisjgarcia/test ([53f3434](https://github.com/francisjgarcia/actions-templates/commit/53f3434)) — Francis J. García
+
+
+
 ## [v0.5.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.2) (2026-04-04)
-
-
 ### 🐛 Bug fixes
 
 * fix(docs): remove Node.js usage guide from README.md ([aadd424](https://github.com/francisjgarcia/actions-templates/commit/aadd424)) — Francis J. García
@@ -10,8 +26,6 @@
 ### 🔧 Other changes
 
 * Merge pull request #1 from francisjgarcia/test ([723f214](https://github.com/francisjgarcia/actions-templates/commit/723f214)) — Francis J. García
-
-
 
 ## [v0.5.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.1) (2026-04-04)
 ### 🐛 Bug fixes
