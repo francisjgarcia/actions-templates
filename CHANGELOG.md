@@ -1,13 +1,18 @@
 # Changelog
 
+## [v0.5.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.1) (2026-04-04)
+
+
+### 🐛 Bug fixes
+
+* fix(workflows): remove unnecessary yamllint rule ([50c50ed](https://github.com/francisjgarcia/actions-templates/commit/50c50ed)) — Francis J. García
+
+
+
 ## [v0.5.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.0) (2026-04-04)
-
-
 ### ✨ New features
 
 * feat(workflows): update linting configuration for YAML files ([762bfe7](https://github.com/francisjgarcia/actions-templates/commit/762bfe7)) — Francis J. García
-
-
 
 ## [v0.4.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.4.0) (2026-04-04)
 ### ✨ New features
