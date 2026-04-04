@@ -4,16 +4,17 @@ on:
   pull_request:
     branches:
       - main
-  push:
-    branches:
-      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
 
 jobs:
   lint:
     name: Lint workflows and actions
     uses: ./.github/workflows/wf-lint.yml
     with:
-      actionlint_paths: '.github/workflows/*.yml'
       yamllint_paths: |
         .github/workflows/
         actions/

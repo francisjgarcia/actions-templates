@@ -4,11 +4,6 @@ name: Lint (Reusable)
 on:
   workflow_call:
     inputs:
-      actionlint_paths:
-        required: false
-        type: string
-        default: '.github/workflows/*.yml'
-        description: 'Glob pattern of workflow files to lint with actionlint'
       yamllint_paths:
         required: false
         type: string
@@ -32,7 +27,7 @@ jobs:
       - name: Run actionlint
         uses: rhysd/actionlint@v1.7.12
         with:
-          args: -color ${{ inputs.actionlint_paths }}
+          args: -color
 
       - name: Actionlint summary
         if: always()
@@ -40,7 +35,7 @@ jobs:
           echo "## Lint summary" >> $GITHUB_STEP_SUMMARY
           echo "| Check | Paths | Result |" >> $GITHUB_STEP_SUMMARY
           echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
-          echo "| actionlint | \`${{ inputs.actionlint_paths }}\` | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
+          echo "| actionlint | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
 
   yamllint:
     name: Lint YAML
@@ -73,4 +68,7 @@ jobs:
       - name: Yamllint summary
         if: always()
         run: |
+          echo "## Lint summary" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Paths | Result |" >> $GITHUB_STEP_SUMMARY
+          echo "| --- | --- | --- |" >> $GITHUB_STEP_SUMMARY
           echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
