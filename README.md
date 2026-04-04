@@ -243,7 +243,6 @@ following Conventional Commits specification.
 Detailed usage guides per language:
 
 - [Python](docs/usage/python.md)
-- [Node.js](docs/usage/nodejs.md)
 - [Go](docs/usage/go.md)
 
 Ready-to-use examples:
