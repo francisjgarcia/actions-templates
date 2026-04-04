@@ -1,3 +1,4 @@
+---
 name: Lint (Reusable)
 
 on:
@@ -6,8 +7,8 @@ on:
       actionlint_paths:
         required: false
         type: string
-        default: '.github/workflows/'
-        description: 'Space-separated list of paths to lint with actionlint'
+        default: '.github/workflows/*.yml'
+        description: 'Glob pattern of workflow files to lint with actionlint'
       yamllint_paths:
         required: false
         type: string

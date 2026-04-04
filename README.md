@@ -32,8 +32,10 @@ with automatic semantic versioning based on [Conventional Commits](https://www.c
 - **Automatic semantic versioning** — `feat:` bumps minor, `fix:` bumps patch, `feat!:` bumps major
 - **Docker image build** with OCI labels and GitHub Actions cache
 - **Vulnerability scanning** with Anchore and SARIF upload to GitHub Security tab
-- **Automatic changelog** generation and GitHub releases
+- **Automatic changelog** generation and GitHub releases with AI-generated summary
 - **Multi-container deploy** support via JSON configuration
+- **PR title validation** enforcing Conventional Commits format
+- **Workflow linting** with actionlint and yamllint
 - **Language agnostic** — works with Python, Node.js, Go and any containerized app
 - **Trunk Based Development** — single `main` branch, no `develop` branch needed
 
@@ -41,77 +43,14 @@ with automatic semantic versioning based on [Conventional Commits](https://www.c
 
 ## Quick start
 
-Add this file to your repository at `.github/workflows/cicd.yml`:
-```yaml
-name: CI/CD Pipeline
+Copy one of the ready-to-use examples into your repository at `.github/workflows/`:
 
-on:
-  push:
-    branches:
-      - main
+| Example | Description |
+| --- | --- |
+| [single-container/cicd.yml](examples/single-container/cicd.yml) | One container deployment |
+| [multi-container/cicd.yml](examples/multi-container/cicd.yml) | Multiple containers deployment |
 
-permissions:
-  contents: write
-  packages: write
-  security-events: write
-
-jobs:
-  setup:
-    name: Setup environment
-    if: github.event.head_commit.message != 'Initial commit'
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-setup.yml@main
-
-  build:
-    name: Build image
-    needs: setup
-    if: needs.setup.outputs.tag_version != ''
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-build.yml@main
-    with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      github_repository: ${{ github.repository }}
-      author_name:       ${{ needs.setup.outputs.author_name }}
-      author_email:      ${{ needs.setup.outputs.author_email }}
-      repo_description:  ${{ needs.setup.outputs.repo_description }}
-      created_at:        ${{ needs.setup.outputs.created_at }}
-
-  tests:
-    name: Test application
-    needs: [setup, build]
-    if: needs.setup.outputs.tag_version != ''
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-tests.yml@main
-    with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      github_repository: ${{ github.repository }}
-
-  scan:
-    name: Scan vulnerabilities
-    needs: [setup, build]
-    if: needs.setup.outputs.tag_version != ''
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-scan.yml@main
-    with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      github_repository: ${{ github.repository }}
-
-  push:
-    name: Push to registry
-    needs: [setup, tests, scan]
-    if: needs.setup.outputs.tag_version != ''
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-push.yml@main
-    with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      github_repository: ${{ github.repository }}
-
-  release:
-    name: Tag and release
-    needs: [setup, push]
-    if: needs.setup.outputs.tag_version != ''
-    uses: francisjgarcia/actions-templates/.github/workflows/wf-release.yml@main
-    with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      bump_type:         ${{ needs.setup.outputs.bump_type }}
-      github_repository: ${{ github.repository }}
-      changelog_entries: ${{ needs.setup.outputs.changelog_entries }}
-```
+For language-specific guides see the [Documentation](#documentation) section below.
 
 ---
 
@@ -122,6 +61,8 @@ jobs:
 Calculates the next semantic version tag based on Conventional Commits,
 and exposes repository metadata as outputs for downstream jobs.
 
+> Source: [.github/workflows/wf-setup.yml](.github/workflows/wf-setup.yml)
+
 | Output | Description |
 | --- | --- |
 | `tag_version` | Next semver tag (`v1.2.3`) or empty if no release needed |
@@ -131,12 +72,16 @@ and exposes repository metadata as outputs for downstream jobs.
 | `author_name` | Name of the commit author |
 | `author_email` | Email of the commit author |
 | `created_at` | ISO timestamp of the run |
-| `changelog_entries` | Commit list since last tag |
+| `changelog_entries` | Grouped commit list since last tag |
+
+---
 
 ### `wf-build.yml` — Build Docker image
 
 Builds a Docker image using `docker/build-push-action` with OCI labels,
 GitHub Actions layer cache, and uploads the image tar as an artifact.
+
+> Source: [.github/workflows/wf-build.yml](.github/workflows/wf-build.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -149,9 +94,13 @@ GitHub Actions layer cache, and uploads the image tar as an artifact.
 | `dockerfile` | ❌ | `docker/Dockerfile` | Path to Dockerfile |
 | `platform` | ❌ | `linux/amd64` | Target platform |
 
+---
+
 ### `wf-tests.yml` — Run tests
 
 Runs tests inside the built Docker image. Supports flake8, pytest and custom commands.
+
+> Source: [.github/workflows/wf-tests.yml](.github/workflows/wf-tests.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -161,10 +110,14 @@ Runs tests inside the built Docker image. Supports flake8, pytest and custom com
 | `pytest_enabled` | ❌ | `false` | Enable pytest |
 | `test_command` | ❌ | `''` | Custom test command |
 
+---
+
 ### `wf-scan.yml` — Vulnerability scan
 
 Scans the Docker image with Anchore, uploads SARIF to the GitHub Security tab,
 and generates a detailed summary.
+
+> Source: [.github/workflows/wf-scan.yml](.github/workflows/wf-scan.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -174,18 +127,27 @@ and generates a detailed summary.
 | `severity_cutoff` | ❌ | `critical` | Minimum severity to report |
 | `only_fixed` | ❌ | `true` | Only report CVEs with a fix |
 
+---
+
 ### `wf-push.yml` — Push to registry
 
 Pushes the image to GitHub Container Registry (`ghcr.io`) with the semver tag and `latest`.
+
+> Source: [.github/workflows/wf-push.yml](.github/workflows/wf-push.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
 | `tag_version` | ✅ | — | Image tag |
 | `github_repository` | ✅ | — | `org/repo` |
 
+---
+
 ### `wf-release.yml` — Create release
 
-Updates `CHANGELOG.md`, commits it, creates a git tag and a GitHub release.
+Updates `CHANGELOG.md`, commits it, creates a git tag and a GitHub release
+with an AI-generated summary and a grouped commit changelog.
+
+> Source: [.github/workflows/wf-release.yml](.github/workflows/wf-release.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -194,9 +156,13 @@ Updates `CHANGELOG.md`, commits it, creates a git tag and a GitHub release.
 | `github_repository` | ✅ | — | `org/repo` |
 | `changelog_entries` | ✅ | — | Formatted commit list |
 
+---
+
 ### `wf-deploy.yml` — Deploy containers
 
 Deploys one or more Docker containers on the runner host from a JSON configuration array.
+
+> Source: [.github/workflows/wf-deploy.yml](.github/workflows/wf-deploy.yml)
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
@@ -227,12 +193,41 @@ Container configuration schema:
 
 ---
 
+### `wf-lint.yml` — Lint workflows
+
+Runs actionlint and yamllint against the repository workflows.
+
+> Source: [.github/workflows/wf-lint.yml](.github/workflows/wf-lint.yml)
+
+| Input | Required | Default | Description |
+| --- | --- | --- | --- |
+| `actionlint_paths` | ❌ | `.github/workflows/` | Paths for actionlint |
+| `yamllint_paths` | ❌ | `.github/workflows/` | Paths for yamllint |
+| `yamllint_max_line_length` | ❌ | `180` | Max line length |
+
+---
+
+### `wf-pr-validation.yml` — PR title validation
+
+Validates that the PR title follows the Conventional Commits format.
+
+> Source: [.github/workflows/wf-pr-validation.yml](.github/workflows/wf-pr-validation.yml)
+
+| Input | Required | Default | Description |
+| --- | --- | --- | --- |
+| `allowed_types` | ❌ | `feat\|fix\|docs\|chore\|...` | Pipe-separated allowed types |
+| `max_title_length` | ❌ | `100` | Max description length |
+
+---
+
 ## Composite actions
 
 ### `actions/calculate-tag`
 
 Analyzes all commits since the last tag and determines the next semver bump
 following Conventional Commits specification.
+
+> Source: [actions/calculate-tag/action.yml](actions/calculate-tag/action.yml)
 
 | Bump | Trigger |
 | --- | --- |

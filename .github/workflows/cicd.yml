@@ -1,3 +1,4 @@
+---
 name: CI/CD Pipeline
 
 on:
@@ -27,7 +28,7 @@ jobs:
     if: needs.setup.outputs.tag_version != ''
     uses: ./.github/workflows/wf-release.yml
     with:
-      tag_version:       ${{ needs.setup.outputs.tag_version }}
-      bump_type:         ${{ needs.setup.outputs.bump_type }}
+      tag_version: ${{ needs.setup.outputs.tag_version }}
+      bump_type: ${{ needs.setup.outputs.bump_type }}
       github_repository: ${{ github.repository }}
       changelog_entries: ${{ needs.setup.outputs.changelog_entries }}

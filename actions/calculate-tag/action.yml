@@ -1,3 +1,4 @@
+---
 name: Calculate next semver tag
 description: Calculates the next semver tag using Conventional Commits and generates a grouped changelog
 

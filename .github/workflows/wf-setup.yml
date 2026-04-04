@@ -1,29 +1,30 @@
+---
 name: Setup (Reusable)
 
 on:
   workflow_call:
     outputs:
-      tag_version:       { value: "${{ jobs.setup.outputs.tag_version }}" }
-      bump_type:         { value: "${{ jobs.setup.outputs.bump_type }}" }
-      repo_name:         { value: "${{ jobs.setup.outputs.repo_name }}" }
-      repo_description:  { value: "${{ jobs.setup.outputs.repo_description }}" }
-      author_name:       { value: "${{ jobs.setup.outputs.author_name }}" }
-      author_email:      { value: "${{ jobs.setup.outputs.author_email }}" }
-      created_at:        { value: "${{ jobs.setup.outputs.created_at }}" }
-      changelog_entries: { value: "${{ jobs.setup.outputs.changelog_entries }}" }
+      tag_version: {value: "${{ jobs.setup.outputs.tag_version }}"}
+      bump_type: {value: "${{ jobs.setup.outputs.bump_type }}"}
+      repo_name: {value: "${{ jobs.setup.outputs.repo_name }}"}
+      repo_description: {value: "${{ jobs.setup.outputs.repo_description }}"}
+      author_name: {value: "${{ jobs.setup.outputs.author_name }}"}
+      author_email: {value: "${{ jobs.setup.outputs.author_email }}"}
+      created_at: {value: "${{ jobs.setup.outputs.created_at }}"}
+      changelog_entries: {value: "${{ jobs.setup.outputs.changelog_entries }}"}
 
 jobs:
   setup:
     runs-on: ubuntu-latest
     environment: production
     outputs:
-      tag_version:       ${{ steps.tag.outputs.tag_version }}
-      bump_type:         ${{ steps.tag.outputs.bump_type }}
-      repo_name:         ${{ steps.vars.outputs.repo_name }}
-      repo_description:  ${{ steps.vars.outputs.repo_description }}
-      author_name:       ${{ steps.vars.outputs.author_name }}
-      author_email:      ${{ steps.vars.outputs.author_email }}
-      created_at:        ${{ steps.vars.outputs.created_at }}
+      tag_version: ${{ steps.tag.outputs.tag_version }}
+      bump_type: ${{ steps.tag.outputs.bump_type }}
+      repo_name: ${{ steps.vars.outputs.repo_name }}
+      repo_description: ${{ steps.vars.outputs.repo_description }}
+      author_name: ${{ steps.vars.outputs.author_name }}
+      author_email: ${{ steps.vars.outputs.author_email }}
+      created_at: ${{ steps.vars.outputs.created_at }}
       changelog_entries: ${{ steps.tag.outputs.changelog_entries }}
 
     steps:
@@ -52,7 +53,8 @@ jobs:
           echo "### Output variables" >> $GITHUB_STEP_SUMMARY
           echo "- Environment: production" >> $GITHUB_STEP_SUMMARY
           if [[ -n "${{ steps.tag.outputs.tag_version }}" ]]; then
-            echo "- Tag version: [${{ steps.tag.outputs.tag_version }}](https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.tag.outputs.tag_version }})" >> $GITHUB_STEP_SUMMARY
+            TAG_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.tag.outputs.tag_version }}"
+            echo "- Tag version: [${{ steps.tag.outputs.tag_version }}](${TAG_URL})" >> $GITHUB_STEP_SUMMARY
           else
             echo "- Tag version: no release (\`${{ steps.tag.outputs.bump_type }}\` commit)" >> $GITHUB_STEP_SUMMARY
           fi
