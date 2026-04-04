@@ -69,10 +69,13 @@ jobs:
 
       - name: Yamllint summary
         if: always()
+        env:
+          YAMLLINT_PATHS: ${{ inputs.yamllint_paths }}
         run: |
+          YAMLLINT_PATHS_INLINE=$(echo "$YAMLLINT_PATHS" | tr '\n' ' ' | sed 's/ $//')
           {
             echo "## Lint summary"
             echo "| Check | Paths | Result |"
             echo "| --- | --- | --- |"
-            echo "| yamllint | \`${{ inputs.yamllint_paths }}\` | ✅ Passed |"
+            echo "| yamllint | \`${YAMLLINT_PATHS_INLINE}\` | ✅ Passed |"
           } >> "$GITHUB_STEP_SUMMARY"
