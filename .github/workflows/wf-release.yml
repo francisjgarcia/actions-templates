@@ -26,10 +26,23 @@ jobs:
       contents: write
 
     steps:
+      - name: Generate app token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
       - name: Checkout code
-        uses: actions/checkout@v6.0.2
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Setup git identity
+        run: |
+          git config --global user.name "actions-templates-bot[bot]"
+          git config --global user.email "actions-templates-bot[bot]@users.noreply.github.com"
 
       - name: Update CHANGELOG.md
         env:
@@ -64,7 +77,7 @@ jobs:
         run: git add CHANGELOG.md
 
       - name: Commit and push CHANGELOG.md
-        uses: qoomon/actions--create-commit@v1.2.3
+        uses: qoomon/actions--create-commit@v1
         with:
           message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
           skip-empty: true
@@ -74,7 +87,7 @@ jobs:
 
       - name: Generate AI release notes
         id: ai_notes
-        uses: actions/github-script@v8.0.0
+        uses: actions/github-script@v8
         with:
           script: |
             const response = await github.rest.repos.generateReleaseNotes({
@@ -86,7 +99,7 @@ jobs:
           result-encoding: string
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v2.6.1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ inputs.tag_version }}
           name: "Release ${{ inputs.tag_version }}"
