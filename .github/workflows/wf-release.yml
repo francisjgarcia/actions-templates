@@ -26,64 +26,64 @@ jobs:
       contents: write
 
     steps:
-      # - name: Generate app token
-      #   id: app_token
-      #   uses: actions/create-github-app-token@v3
-      #   with:
-      #     app-id: ${{ secrets.APP_ID }}
-      #     private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      - name: Generate app token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
 
-      # - name: Checkout code
-      #   uses: actions/checkout@v6
-      #   with:
-      #     fetch-depth: 0
-      #     token: ${{ steps.app_token.outputs.token }}
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
 
-      # - name: Setup git identity
-      #   run: |
-      #     git config --global user.name "actions-templates-bot[bot]"
-      #     git config --global user.email "actions-templates-bot[bot]@users.noreply.github.com"
+      - name: Setup git identity
+        run: |
+          git config --global user.name "actions-templates-bot[bot]"
+          git config --global user.email "actions-templates-bot[bot]@users.noreply.github.com"
 
-      # - name: Update CHANGELOG.md
-      #   env:
-      #     TAG_VERSION: ${{ inputs.tag_version }}
-      #     GITHUB_REPOSITORY: ${{ inputs.github_repository }}
-      #     CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
-      #   run: |
-      #     TEMP_ENTRIES=$(mktemp)
-      #     echo "$CHANGELOG_ENTRIES" > "$TEMP_ENTRIES"
+      - name: Update CHANGELOG.md
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+        run: |
+          TEMP_ENTRIES=$(mktemp)
+          echo "$CHANGELOG_ENTRIES" > "$TEMP_ENTRIES"
 
-      #     TEMP_CHANGELOG=$(mktemp)
-      #     {
-      #       echo "# Changelog"
-      #       echo ""
-      #       echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))"
-      #       echo ""
-      #       cat "$TEMP_ENTRIES"
-      #       echo ""
-      #     } > "$TEMP_CHANGELOG"
+          TEMP_CHANGELOG=$(mktemp)
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))"
+            echo ""
+            cat "$TEMP_ENTRIES"
+            echo ""
+          } > "$TEMP_CHANGELOG"
 
-      #     if [ -f CHANGELOG.md ]; then
-      #       sed '/^# Changelog$/d' CHANGELOG.md | sed '/^$/N;/^\n$/d' >> "$TEMP_CHANGELOG"
-      #     fi
+          if [ -f CHANGELOG.md ]; then
+            sed '/^# Changelog$/d' CHANGELOG.md | sed '/^$/N;/^\n$/d' >> "$TEMP_CHANGELOG"
+          fi
 
-      #     mv "$TEMP_CHANGELOG" CHANGELOG.md
-      #     rm -f "$TEMP_ENTRIES"
+          mv "$TEMP_CHANGELOG" CHANGELOG.md
+          rm -f "$TEMP_ENTRIES"
 
-      #     echo "CHANGELOG.md updated:"
-      #     cat CHANGELOG.md
+          echo "CHANGELOG.md updated:"
+          cat CHANGELOG.md
 
-      # - name: Stage CHANGELOG.md
-      #   run: git add CHANGELOG.md
+      - name: Stage CHANGELOG.md
+        run: git add CHANGELOG.md
 
-      # - name: Commit and push CHANGELOG.md
-      #   uses: qoomon/actions--create-commit@v1
-      #   with:
-      #     message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
-      #     skip-empty: true
+      - name: Commit and push CHANGELOG.md
+        uses: qoomon/actions--create-commit@v1
+        with:
+          message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
+          skip-empty: true
 
-      # - name: Push
-      #   run: git push
+      - name: Push
+        run: git push
 
       - name: Generate AI release notes
         id: ai_notes

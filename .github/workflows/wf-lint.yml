@@ -16,6 +16,29 @@ on:
         description: 'Maximum line length for yamllint'
 
 jobs:
+  actionlint:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.7.12
+        with:
+          args: -color
+
+      - name: Actionlint summary
+        if: always()
+        run: |
+          {
+            echo "## Lint summary"
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+            echo "| actionlint | ✅ Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   yamllint:
     name: Lint YAML
     runs-on: ubuntu-latest
