@@ -1,5 +1,7 @@
 ---
 name: Lint (Reusable)
+permissions:
+  contents: read
 
 on:
   workflow_call:
