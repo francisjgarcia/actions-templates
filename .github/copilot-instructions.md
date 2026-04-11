@@ -262,6 +262,7 @@ Non-sensitive config goes in `vars.*` and can be interpolated in `with:` blocks.
 - `GITHUB_TOKEN` must NEVER be declared in `workflow_call` secrets — it is injected automatically
 - `secrets.*` can ONLY be used in `secrets:` blocks, never inside `with:` inputs
 - Optional secrets (e.g. `OPENAI_API_KEY`) must be declared with `required: false` in `workflow_call` and handled gracefully with `continue-on-error: true` so the pipeline never fails if they are absent
+- AI-generated content uses `actions/ai-inference@v2` with `GITHUB_TOKEN` (requires `models: read` permission on the job) — no external API keys needed
 
 ---
 
