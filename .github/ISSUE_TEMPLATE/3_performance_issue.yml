@@ -1,3 +1,4 @@
+---
 name: "\U000026A1 Performance issue"
 description: Report a workflow that is slow or uses excessive resources.
 title: "perf: <short description>"
