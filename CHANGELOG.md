@@ -1,13 +1,24 @@
 # Changelog
 
-## [v0.8.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.3) (2026-04-11)
+## [v0.9.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.9.0) (2026-04-11)
 
+In the v0.9.0 release, a new feature was introduced for "Prueba," enhancing the overall functionality of the software. Additionally, a critical bug related to permissions in the continuous integration (CI) release job was fixed, ensuring that models have the necessary read access, which improves the reliability of the deployment process. These updates aim to streamline user experience and enhance the software's performance.
+
+
+### ✨ New features
+
+* feat(fix): Prueba (#15) ([39bb4f4](https://github.com/francisjgarcia/actions-templates/commit/39bb4f4)) — Francis J. García
 
 ### 🐛 Bug fixes
 
+* fix(ci): add read permission for models in release job (#16) ([d8addcb](https://github.com/francisjgarcia/actions-templates/commit/d8addcb)) — Francis J. García
+
+
+
+## [v0.8.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.3) (2026-04-11)
+### 🐛 Bug fixes
+
 * fix(test): test (#14) ([41cd5c4](https://github.com/francisjgarcia/actions-templates/commit/41cd5c4)) — Francis J. García
-
-
 
 ## [v0.8.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.2) (2026-04-11)
 ### 🐛 Bug fixes
