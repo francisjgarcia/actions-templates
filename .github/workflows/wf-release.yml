@@ -94,6 +94,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               tag_name: '${{ inputs.tag_version }}',
+              target_commitish: context.sha,
             });
             return response.data.body;
           result-encoding: string
