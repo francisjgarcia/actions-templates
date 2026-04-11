@@ -17,6 +17,8 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     environment: production
+    permissions:
+      contents: read
     outputs:
       tag_version: ${{ steps.tag.outputs.tag_version }}
       bump_type: ${{ steps.tag.outputs.bump_type }}

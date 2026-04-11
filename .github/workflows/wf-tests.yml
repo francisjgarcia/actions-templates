@@ -29,6 +29,9 @@ jobs:
     runs-on: ubuntu-latest
     environment: production
     if: inputs.tag_version != ''
+    permissions:
+      contents: read
+      actions: read
 
     steps:
       - name: Checkout code

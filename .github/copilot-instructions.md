@@ -1,81 +1,218 @@
 # GitHub Copilot instructions
 
-## Project type
+These instructions are for GitHub Copilot when generating code in this repository. It covers the project overview, repository structure, CI/CD pipeline flow, coding conventions, and specific rules to follow when modifying files or generating code.
 
-This is a GitHub Actions template library. It contains only YAML workflow files
-and composite action definitions. There is no application code, no package.json,
-no requirements.txt, and no runtime.
+## AI instruction files
 
----
+This repository maintains three AI instruction files that must always be kept in sync:
 
-## Core concepts to understand
-
-### Reusable workflows (`wf-*.yml`)
-Called by consumer repositories via `workflow_call`. They appear in
-`.github/workflows/` and are the primary deliverable of this repo.
-
-### Composite actions (`actions/*/action.yml`)
-Reusable step sequences called with `uses:` inside other workflows.
-Currently only `actions/calculate-tag/action.yml` exists.
-
-### Consumer pattern
-A consumer repository has a minimal `.github/workflows/cicd.yml` that calls
-these workflows. When suggesting changes, always think about how the change
-affects consumers.
-
----
-
-## Pipeline order
-
-When working on this repo, understand the dependency chain:
-
-```
-setup → build → tests ──→ push → release → deploy
-              → scan  ──↗
-```
-
-`wf-setup` is the gate — if it outputs an empty `tag_version`, all other jobs
-skip automatically via `if: inputs.tag_version != ''`.
-
----
-
-## Commit message format (required)
-
-All commits must follow Conventional Commits. The type determines the semver bump:
-
-| Commit | Result |
+| File | Read by |
 | --- | --- |
-| `feat!:` or `BREAKING CHANGE:` | Major release |
-| `feat:` | Minor release |
-| `fix:` `perf:` `refactor:` | Patch release |
-| `docs:` `chore:` `ci:` `test:` | No release |
+| `AGENTS.md` | OpenAI Codex and autonomous agents |
+| `CLAUDE.md` | Claude (Anthropic) |
+| `.github/copilot-instructions.md` | GitHub Copilot |
+
+**Sync rule:** whenever you modify any of these files, you must apply the same change to the other two.
+
+**Learning rule:** whenever you discover or correct something important about how this repository works — a new convention, a pattern that caused issues, a rule clarification — add it to all three files immediately so future AI sessions always have accurate context.
 
 ---
 
-## Strict rules for suggestions
+## Project overview
 
-### Never suggest
-- Adding `on: push` or `on: schedule` to `wf-*.yml` files
-- Declaring `GITHUB_TOKEN` in `workflow_call` secrets blocks
-- Using `secrets.*` inside `with:` input blocks
-- Using `actions/checkout@main` or any `@latest` action ref
-- Direct interpolation of `${{ github.event.*.title }}` in `run:` scripts
-- Editing `CHANGELOG.md` directly
-- Adding a `development` branch or `gitflow` patterns
+`actions-templates` is a centralized library of reusable GitHub Actions workflows
+and composite actions maintained by Francis J. García (@francisjgarcia).
 
-### Always suggest
-- Pinned version tags for actions (`@v4`, `@v3.6.1`)
-- `env:` blocks to pass external values to bash scripts
-- `if: inputs.tag_version != ''` guard on every job in reusable workflows
-- `retention-days: 1` on docker image artifacts
-- Step summaries (`$GITHUB_STEP_SUMMARY`) on every job
+Consumer repositories call these templates from their own `.github/workflows/cicd.yml`
+instead of duplicating pipeline logic. This centralizes all CI/CD logic so changes
+propagate to all consumers at once.
+
+This repo does **not** contain application code. It contains only:
+- Reusable workflows (`wf-*.yml`)
+- Composite actions (`actions/*/action.yml`)
+- Documentation and examples
+
+---
+
+## Repository structure
+
+```
+actions-templates/
+├── .github/
+│   ├── ISSUE_TEMPLATE/        # Issue forms (structured YAML)
+│   ├── workflows/
+│   │   ├── cicd.yml           # This repo's own pipeline (uses ./ local refs)
+│   │   ├── lint.yml           # Calls wf-lint.yml with ./
+│   │   ├── pr-validation.yml  # Calls wf-pr-validation.yml with ./
+│   │   ├── codeql.yml         # CodeQL security analysis
+│   │   ├── wf-setup.yml       # Reusable: semver + metadata
+│   │   ├── wf-build.yml       # Reusable: docker build + artifact
+│   │   ├── wf-tests.yml       # Reusable: flake8, pytest, custom
+│   │   ├── wf-scan.yml        # Reusable: Anchore CVE scan + SARIF
+│   │   ├── wf-push.yml        # Reusable: ghcr.io push
+│   │   ├── wf-release.yml     # Reusable: CHANGELOG + GitHub release
+│   │   ├── wf-deploy.yml      # Reusable: multi-container docker deploy
+│   │   ├── wf-lint.yml        # Reusable: actionlint + yamllint
+│   │   └── wf-pr-validation.yml # Reusable: conventional commit PR title check
+│   ├── CODEOWNERS
+│   ├── copilot-instructions.md  # Instructions for GitHub Copilot
+│   ├── FUNDING.yml
+│   ├── PULL_REQUEST_TEMPLATE.md
+│   ├── dependabot.yml
+│   └── release.yml            # GitHub release notes grouping by labels
+├── actions/
+│   └── calculate-tag/
+│       └── action.yml         # Composite: semver bump from conventional commits
+├── docs/
+│   └── usage/
+│       ├── python.md
+│       ├── nodejs.md
+│       └── go.md
+├── examples/
+│   ├── single-container/
+│   │   └── cicd.yml           # Ready-to-use example (can be modified)
+│   └── multi-container/
+│       └── cicd.yml           # Ready-to-use example (can be modified)
+├── AGENTS.md                  # Instructions for autonomous AI agents
+├── ARCHITECTURE.md
+├── AUTHORS
+├── CHANGELOG.md               # Auto-generated by wf-release.yml — do not edit manually
+├── CLAUDE.md                  # Instructions for Claude AI assistant
+├── CODE_OF_CONDUCT.md
+├── CONTRIBUTING.md
+├── CONVENTIONS.md
+├── GOVERNANCE.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+└── SUPPORT.md
+```
+
+---
+
+## CI/CD pipeline flow
+
+```
+push to main
+    │
+    ├── wf-setup      → calculate-tag (conventional commits) + repo metadata
+    │                   outputs: tag_version, bump_type, changelog_entries, author_*, etc.
+    │                   if bump_type=none → all downstream jobs are skipped
+    │
+    ├── wf-build      → docker buildx + OCI labels + upload artifact (tar, 1 day retention)
+    │
+    ├── wf-tests      → runs inside built image (flake8, pytest, or custom command)
+    ├── wf-scan       → Anchore CVE scan → SARIF uploaded to Security tab
+    │
+    ├── wf-push       → ghcr.io push (semver tag + latest)
+    │
+    ├── wf-release    → CHANGELOG.md update + commit via GitHub App + GitHub release
+    │                   release body: AI summary + grouped commit changelog
+    │
+    └── wf-deploy     → multi-container deploy via JSON array input
+                        secrets passed via APP_ENV_VARS (JSON secret)
+
+pull request to main
+    ├── lint          → actionlint + yamllint
+    └── pr-validation → conventional commit format check on PR title
+```
+
+- `wf-setup` outputs `tag_version` — if empty, ALL downstream jobs skip automatically
+- `wf-build` uploads a docker image `.tar` artifact (retention: 1 day)
+- `wf-tests` and `wf-scan` both download that artifact independently
+- `wf-push` runs only after both tests and scan pass
+- `wf-release` commits `CHANGELOG.md` via GitHub App token (bypasses branch protection)
+- `wf-deploy` receives container config as JSON array + secrets as `APP_ENV_VARS` JSON secret
+
+---
+
+## Conventional commits
+
+Every commit and PR title must follow this format:
+
+```
+<type>[optional scope]: <description>
+```
+
+Valid types: `feat`, `fix`, `perf`, `refactor`, `docs`, `chore`, `ci`, `test`, `style`, `build`
+
+| Type | Semver bump | When to use |
+| --- | --- | --- |
+| `feat!` or `BREAKING CHANGE:` | MAJOR | Breaking change in workflow inputs/outputs |
+| `feat` | MINOR | New workflow, action, or input |
+| `fix` | PATCH | Bug fix in existing workflow or action |
+| `perf` | PATCH | Performance improvement |
+| `refactor` | PATCH | Code refactor without behavior change |
+| `docs` | none | Documentation only |
+| `chore` | none | Maintenance |
+| `ci` | none | CI/CD changes |
+| `test` | none | Tests |
+
+The highest bump in a set of commits wins. If a PR contains `fix:` and `feat:`, the result is MINOR.
+
+Breaking changes: append `!` after type → `feat!: rename input version`
+
+Examples:
+```
+feat(wf-deploy): add dns input for container configuration
+fix(calculate-tag): handle repos with no previous tags correctly
+docs: update nodejs usage guide with test_command example
+chore: update anchore/scan-action to v3.4.0
+```
+
+---
+
+## File modification guidelines
+
+| File / Directory | May modify | Notes |
+| --- | --- | --- |
+| `.github/workflows/wf-*.yml` | ✅ Yes | Core reusable workflows |
+| `actions/*/action.yml` | ✅ Yes | Composite actions |
+| `docs/usage/*.md` | ✅ Yes | Keep in sync with workflow inputs |
+| `examples/*/cicd.yml` | ✅ Yes | Update when calling conventions change |
+| `README.md` | ✅ Yes | Keep inputs/outputs tables accurate |
+| `CONTRIBUTING.md` | ✅ Yes | |
+| `CHANGELOG.md` | ❌ Never | Auto-generated by `wf-release.yml` |
+| `.github/workflows/cicd.yml` | ⚠️ With care | This repo's own pipeline |
+| `LICENSE` | ❌ Never | |
+| `CODEOWNERS` | ❌ Never | |
+
+When modifying a reusable workflow, always check and update if needed:
+- `README.md` → inputs/outputs table for that workflow
+- `docs/usage/*.md` → if the consumer calling convention changes
+- `examples/*/cicd.yml` → if new required inputs are added or existing ones renamed
+
+---
+
+## Permissions
+
+Always define `permissions` at the **job level**, never at the workflow root level.
+This applies to every workflow file — reusable (`wf-*.yml`) or caller (`cicd.yml`, `lint.yml`, etc.).
+
+```yaml
+# Correct — job level
+jobs:
+  build:
+    permissions:
+      contents: read
+      packages: write
+
+# Wrong — root level
+permissions:
+  contents: read
+jobs:
+  build:
+    ...
+```
+
+Assign only the minimum permissions required by each job (principle of least privilege).
 
 ---
 
 ## YAML formatting
 
 - Indent: 2 spaces
-- No `---` document start
+- No `---` document start marker
 - Max line length: 180 characters
 - Align values in `with:` blocks for readability:
 
@@ -88,12 +225,22 @@ with:
 
 ---
 
-## When modifying a reusable workflow
+## GitHub Actions expression rules
 
-If you add, rename, or remove an input/output, also update:
-1. `README.md` — the inputs/outputs table for that workflow
-2. `docs/usage/*.md` — if the consumer calling pattern changes
-3. `examples/*/cicd.yml` — if new required inputs are added
+- Never interpolate `${{ github.event.*.title }}` or other external values directly in `run:` scripts
+- Always pass external values through `env:` blocks and reference as `$VARIABLE` in bash:
+
+```yaml
+# Correct
+- name: Validate
+  env:
+    PR_TITLE: ${{ github.event.pull_request.title }}
+  run: echo "$PR_TITLE"
+
+# Wrong
+- name: Validate
+  run: echo "${{ github.event.pull_request.title }}"
+```
 
 ---
 
@@ -111,6 +258,10 @@ secrets:
 
 Non-sensitive config goes in `vars.*` and can be interpolated in `with:` blocks.
 
+- `GITHUB_TOKEN` must NEVER be declared in `workflow_call` secrets — it is injected automatically
+- `secrets.*` can ONLY be used in `secrets:` blocks, never inside `with:` inputs
+- Optional secrets (e.g. `OPENAI_API_KEY`) must be declared with `required: false` in `workflow_call` and handled gracefully with `continue-on-error: true` so the pipeline never fails if they are absent
+
 ---
 
 ## Local vs remote workflow refs
@@ -125,11 +276,40 @@ Consumer repositories use remote refs:
 uses: francisjgarcia/actions-templates/.github/workflows/wf-setup.yml@main
 ```
 
-Never suggest remote refs inside this repository's own workflow files.
+Never use remote refs inside this repository's own workflow files.
+
+---
+
+## What not to do
+
+- Do not push directly to `main` — all changes go through a pull request
+- Do not edit `CHANGELOG.md` directly — auto-generated by `wf-release.yml`
+- Do not add `on: push` or `on: schedule` to `wf-*.yml` files — reusable only (`on: workflow_call`)
+- Do not declare `GITHUB_TOKEN` in `workflow_call` secrets — GitHub injects it automatically
+- Do not use `secrets.*` inside `with:` input blocks
+- Do not use `actions/checkout@main` or any `@latest` action ref — always pin versions
+- Do not hardcode usernames, org names, API tokens, or IP addresses
+- Do not suggest adding `development` branch logic — this repo uses Trunk Based Development
+- Do not use `secrets: inherit` without explicit justification
+- Do not add SSH deploy logic — the runner deploys directly via docker context
+
+---
+
+## Checklist — always verify before submitting
+
+- [ ] Pinned version tags for all actions (`@v4`, `@v3.6.1`) — never `@main` or `@latest`
+- [ ] `env:` blocks used to pass external values into bash scripts
+- [ ] `if: inputs.tag_version != ''` guard on every job in reusable workflows
+- [ ] `retention-days: 1` on docker image artifacts
+- [ ] Step summary (`$GITHUB_STEP_SUMMARY`) present on every job
+- [ ] `permissions` defined at job level, not root level
+- [ ] No `CHANGELOG.md` edits — auto-generated
+- [ ] No direct push to `main` — always via pull request
 
 ---
 
 ## Language
 
-- All code, YAML, variables, comments, documentation: **English**
-- The maintainer communicates in **Spanish** — respond accordingly if asked
+- All code, YAML, variable names, comments, and documentation: **English**
+- Conversation with the maintainer: **Spanish**
+- Commit messages and PR titles: **English** (required by the semver automation)
