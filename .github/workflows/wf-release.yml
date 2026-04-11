@@ -16,6 +16,14 @@ on:
       changelog_entries:
         required: true
         type: string
+    secrets:
+      APP_ID:
+        required: true
+      APP_PRIVATE_KEY:
+        required: true
+      OPENAI_API_KEY:
+        required: false
+        description: 'OpenAI API key for AI-generated release summary (optional)'
 
 jobs:
   release:
@@ -87,17 +95,38 @@ jobs:
 
       - name: Generate AI release notes
         id: ai_notes
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const response = await github.rest.repos.generateReleaseNotes({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              tag_name: '${{ inputs.tag_version }}',
-              target_commitish: context.sha,
-            });
-            return response.data.body;
-          result-encoding: string
+        continue-on-error: true
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+          TAG_VERSION: ${{ inputs.tag_version }}
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "No OPENAI_API_KEY secret configured, skipping AI summary."
+            exit 0
+          fi
+
+          PROMPT="Summarize the following changelog entries for release "
+          PROMPT+="${TAG_VERSION} in a concise, human-friendly paragraph "
+          PROMPT+="(2-4 sentences). Focus on what changed and why it matters "
+          PROMPT+="to users. Do not use bullet points.\n\n${CHANGELOG_ENTRIES}"
+
+          JQ_PAYLOAD=$(jq -n --arg content "$PROMPT" \
+            '{model:"gpt-4o-mini",messages:[{role:"user",content:$content}],max_tokens:300}')
+
+          RESPONSE=$(curl -sf --max-time 30 -X POST https://api.openai.com/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $OPENAI_API_KEY" \
+            -d "$JQ_PAYLOAD")
+          SUMMARY=$(echo "$RESPONSE" | jq -r '.choices[0].message.content // ""')
+
+          if [ -n "$SUMMARY" ]; then
+            {
+              echo "result<<EOF"
+              echo "$SUMMARY"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Prepare release body
         env:
@@ -106,12 +135,14 @@ jobs:
           CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
         run: |
           {
-            echo "## 🤖 AI-generated summary"
-            echo ""
-            echo "$AI_NOTES"
-            echo ""
-            echo "---"
-            echo ""
+            if [ -n "$AI_NOTES" ]; then
+              echo "## 🤖 AI-generated summary"
+              echo ""
+              echo "$AI_NOTES"
+              echo ""
+              echo "---"
+              echo ""
+            fi
             echo "## 📋 Commit changelog"
             echo ""
             echo "**Bump type:** \`$BUMP_TYPE\`"

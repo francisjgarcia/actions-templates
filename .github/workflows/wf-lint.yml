@@ -1,7 +1,5 @@
 ---
 name: Lint (Reusable)
-permissions:
-  contents: read
 
 on:
   workflow_call:
@@ -21,6 +19,8 @@ jobs:
   yamllint:
     name: Lint YAML
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout code

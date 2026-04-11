@@ -14,4 +14,6 @@ on:
 jobs:
   pr-validation:
     name: Validate PR title
+    permissions:
+      contents: read
     uses: ./.github/workflows/wf-pr-validation.yml

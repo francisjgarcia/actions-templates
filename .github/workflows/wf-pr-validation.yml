@@ -19,6 +19,8 @@ jobs:
   validate-title:
     name: Validate PR title
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
       - name: Check conventional commit format
