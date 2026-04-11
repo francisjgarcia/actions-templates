@@ -1,13 +1,18 @@
 # Changelog
 
-## [v0.7.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.7.0) (2026-04-11)
+## [v0.8.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.0) (2026-04-11)
 
 
 ### ✨ New features
 
+* feat(workflows): Ia (#11) ([b55a00f](https://github.com/francisjgarcia/actions-templates/commit/b55a00f)) — Francis J. García
+
+
+
+## [v0.7.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.7.0) (2026-04-11)
+### ✨ New features
+
 * feat(workflows): add target_commitish to GitHub release API call (#10) ([218d070](https://github.com/francisjgarcia/actions-templates/commit/218d070)) — Francis J. García
-
-
 
 ## [v0.6.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.6.0) (2026-04-11)
 ### ✨ New features
