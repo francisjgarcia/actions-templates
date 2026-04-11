@@ -27,6 +27,7 @@ jobs:
     needs: setup
     if: needs.setup.outputs.tag_version != ''
     uses: ./.github/workflows/wf-release.yml
+    secrets: inherit
     with:
       tag_version: ${{ needs.setup.outputs.tag_version }}
       bump_type: ${{ needs.setup.outputs.bump_type }}
