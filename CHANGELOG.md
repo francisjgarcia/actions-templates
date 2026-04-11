@@ -105,6 +105,8 @@ In the v0.9.0 release, a new feature was introduced for "Prueba," enhancing the 
 
 * feat(workflows): update `wf-release` to enhance CHANGELOG.md handling ([c4aaf34](https://github.com/francisjgarcia/actions-templates/commit/c4aaf34)) — Francis J. García
 
+---
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
