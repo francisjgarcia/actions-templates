@@ -1,13 +1,18 @@
 # Changelog
 
-## [v0.8.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.2) (2026-04-11)
+## [v0.8.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.3) (2026-04-11)
 
 
 ### 🐛 Bug fixes
 
+* fix(test): test (#14) ([41cd5c4](https://github.com/francisjgarcia/actions-templates/commit/41cd5c4)) — Francis J. García
+
+
+
+## [v0.8.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.2) (2026-04-11)
+### 🐛 Bug fixes
+
 * fix: remove unnecessary lines from PR template (#13) ([d063916](https://github.com/francisjgarcia/actions-templates/commit/d063916)) — Francis J. García
-
-
 
 ## [v0.8.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.1) (2026-04-11)
 ### 🐛 Bug fixes
