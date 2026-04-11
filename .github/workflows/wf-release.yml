@@ -84,6 +84,7 @@ jobs:
             echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))"
             echo ""
             if [ -n "$AI_NOTES" ]; then
+              echo "### 🤖 AI-generated summary"
               echo "$AI_NOTES"
               echo ""
             fi
