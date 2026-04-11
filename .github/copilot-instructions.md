@@ -213,7 +213,8 @@ Assign only the minimum permissions required by each job (principle of least pri
 
 - Indent: 2 spaces
 - No `---` document start marker
-- Max line length: 180 characters
+- **Max line length: 180 characters** — yamllint is configured with this limit and will fail the pipeline if any line exceeds it
+- Long `run:` script lines must be split using shell line continuation (`\`) or by assigning intermediate variables
 - Align values in `with:` blocks for readability:
 
 ```yaml
