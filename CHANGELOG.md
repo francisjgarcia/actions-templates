@@ -1,8 +1,20 @@
 # Changelog
 
+## [v0.8.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.0) (2026-04-11)
+
+
+### ✨ New features
+
+* feat(workflows): Ia (#11) ([b55a00f](https://github.com/francisjgarcia/actions-templates/commit/b55a00f)) — Francis J. García
+
+
+
+## [v0.7.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.7.0) (2026-04-11)
+### ✨ New features
+
+* feat(workflows): add target_commitish to GitHub release API call (#10) ([218d070](https://github.com/francisjgarcia/actions-templates/commit/218d070)) — Francis J. García
+
 ## [v0.6.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.6.0) (2026-04-11)
-
-
 ### ✨ New features
 
 * feat: Test (#9) ([8eca4fd](https://github.com/francisjgarcia/actions-templates/commit/8eca4fd)) — Francis J. García
@@ -14,8 +26,6 @@
 * ci(tests): tests (#7) ([1d91c2e](https://github.com/francisjgarcia/actions-templates/commit/1d91c2e)) — Francis J. García
 * hola(workflows): update action versions to latest stable releases (#6) ([ea1e567](https://github.com/francisjgarcia/actions-templates/commit/ea1e567)) — Francis J. García
 * Update CodeQL workflow configuration (#5) ([149cfcf](https://github.com/francisjgarcia/actions-templates/commit/149cfcf)) — Francis J. García
-
-
 
 ## [v0.5.4](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.4) (2026-04-04)
 ### 🐛 Bug fixes
