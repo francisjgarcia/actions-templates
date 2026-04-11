@@ -1,16 +1,24 @@
 # Changelog
 
+## [v1.0.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.0) (2026-04-11)
+
+### 🤖 AI-generated summary
+In the v1.0.0 release, a significant breaking change was introduced with an update to the model, which needs users to adapt their implementations accordingly. This change aims to improve overall functionality and performance, ensuring a better user experience moving forward. Users should review the details to understand how the adjustments may impact their current setups.
+
+
+### ⚠️ Breaking changes
+
+* feat!: Feat/fix model2 (#18) ([f59675c](https://github.com/francisjgarcia/actions-templates/commit/f59675c)) — Francis J. García
+
+
+
 ## [v0.10.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.10.0) (2026-04-11)
 
 ### 🤖 AI-generated summary
 In release v0.10.0, the AI-generated summary feature in release notes has been improved, enhancing its effectiveness and clarity for users. This change aims to provide better insights into updates, making it easier for users to understand the key changes and benefits of each release.
-
-
 ### ✨ New features
 
 * feat(workflows): enhance AI-generated summary in release notes (#17) ([3f6f1da](https://github.com/francisjgarcia/actions-templates/commit/3f6f1da)) — Francis J. García
-
-
 
 ## [v0.9.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.9.0) (2026-04-11)
 
