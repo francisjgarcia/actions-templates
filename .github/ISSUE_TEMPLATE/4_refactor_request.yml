@@ -1,3 +1,4 @@
+---
 name: "\U0001F9F9 Refactor request"
 description: Suggest a code refactor for clarity, maintainability or best practices.
 title: "refactor: <short description>"
