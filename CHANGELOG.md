@@ -1,8 +1,23 @@
 # Changelog
 
+## [v0.6.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.6.0) (2026-04-11)
+
+
+### ✨ New features
+
+* feat: Test (#9) ([8eca4fd](https://github.com/francisjgarcia/actions-templates/commit/8eca4fd)) — Francis J. García
+* feat(workflows): enhance container configuration description and manage sensitive env vars (#8) ([f0b2daf](https://github.com/francisjgarcia/actions-templates/commit/f0b2daf)) — Francis J. García
+* feat(lint): add YAML front matter to lint workflow (#4) ([d654cd4](https://github.com/francisjgarcia/actions-templates/commit/d654cd4)) — Francis J. García
+
+### 🔧 Other changes
+
+* ci(tests): tests (#7) ([1d91c2e](https://github.com/francisjgarcia/actions-templates/commit/1d91c2e)) — Francis J. García
+* hola(workflows): update action versions to latest stable releases (#6) ([ea1e567](https://github.com/francisjgarcia/actions-templates/commit/ea1e567)) — Francis J. García
+* Update CodeQL workflow configuration (#5) ([149cfcf](https://github.com/francisjgarcia/actions-templates/commit/149cfcf)) — Francis J. García
+
+
+
 ## [v0.5.4](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.4) (2026-04-04)
-
-
 ### 🐛 Bug fixes
 
 * fix(README): update language support in key features section ([154c6a4](https://github.com/francisjgarcia/actions-templates/commit/154c6a4)) — Francis J. García
@@ -10,8 +25,6 @@
 ### 🔧 Other changes
 
 * Merge pull request #3 from francisjgarcia/test ([741534c](https://github.com/francisjgarcia/actions-templates/commit/741534c)) — Francis J. García
-
-
 
 ## [v0.5.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.5.3) (2026-04-04)
 ### 🐛 Bug fixes
