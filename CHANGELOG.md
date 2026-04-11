@@ -1,10 +1,20 @@
 # Changelog
 
+## [v0.10.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.10.0) (2026-04-11)
+
+### 🤖 AI-generated summary
+In release v0.10.0, the AI-generated summary feature in release notes has been improved, enhancing its effectiveness and clarity for users. This change aims to provide better insights into updates, making it easier for users to understand the key changes and benefits of each release.
+
+
+### ✨ New features
+
+* feat(workflows): enhance AI-generated summary in release notes (#17) ([3f6f1da](https://github.com/francisjgarcia/actions-templates/commit/3f6f1da)) — Francis J. García
+
+
+
 ## [v0.9.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.9.0) (2026-04-11)
 
 In the v0.9.0 release, a new feature was introduced for "Prueba," enhancing the overall functionality of the software. Additionally, a critical bug related to permissions in the continuous integration (CI) release job was fixed, ensuring that models have the necessary read access, which improves the reliability of the deployment process. These updates aim to streamline user experience and enhance the software's performance.
-
-
 ### ✨ New features
 
 * feat(fix): Prueba (#15) ([39bb4f4](https://github.com/francisjgarcia/actions-templates/commit/39bb4f4)) — Francis J. García
@@ -12,8 +22,6 @@ In the v0.9.0 release, a new feature was introduced for "Prueba," enhancing the 
 ### 🐛 Bug fixes
 
 * fix(ci): add read permission for models in release job (#16) ([d8addcb](https://github.com/francisjgarcia/actions-templates/commit/d8addcb)) — Francis J. García
-
-
 
 ## [v0.8.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.3) (2026-04-11)
 ### 🐛 Bug fixes
