@@ -1,13 +1,18 @@
 # Changelog
 
+## [v0.8.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.1) (2026-04-11)
+
+
+### 🐛 Bug fixes
+
+* fix(ia): test (#12) ([ba8789e](https://github.com/francisjgarcia/actions-templates/commit/ba8789e)) — Francis J. García
+
+
+
 ## [v0.8.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.8.0) (2026-04-11)
-
-
 ### ✨ New features
 
 * feat(workflows): Ia (#11) ([b55a00f](https://github.com/francisjgarcia/actions-templates/commit/b55a00f)) — Francis J. García
-
-
 
 ## [v0.7.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.7.0) (2026-04-11)
 ### ✨ New features
