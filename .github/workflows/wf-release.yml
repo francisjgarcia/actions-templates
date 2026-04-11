@@ -99,6 +99,31 @@ jobs:
             return response.data.body;
           result-encoding: string
 
+      - name: Prepare release body
+        env:
+          AI_NOTES: ${{ steps.ai_notes.outputs.result }}
+          BUMP_TYPE: ${{ inputs.bump_type }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+        run: |
+          {
+            echo "## 🤖 AI-generated summary"
+            echo ""
+            echo "$AI_NOTES"
+            echo ""
+            echo "---"
+            echo ""
+            echo "## 📋 Commit changelog"
+            echo ""
+            echo "**Bump type:** \`$BUMP_TYPE\`"
+            echo ""
+            echo "<details>"
+            echo "  <summary>Changes since last release</summary>"
+            echo ""
+            echo "$CHANGELOG_ENTRIES"
+            echo ""
+            echo "</details>"
+          } > release_body.md
+
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
@@ -107,22 +132,15 @@ jobs:
           prerelease: false
           draft: false
           generate_release_notes: false
-          body: |
-            ## 🤖 AI-generated summary
+          body_path: release_body.md
 
-            ${{ steps.ai_notes.outputs.result }}
-
-            ---
-
-            ## 📋 Commit changelog
-
-            **Bump type:** `${{ inputs.bump_type }}`
-
-            <details>
-              <summary>Changes since last release</summary>
-
-              ${{ inputs.changelog_entries }}
-            </details>
+      - name: Update major version tag
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+        run: |
+          MAJOR_TAG=$(echo "$TAG_VERSION" | grep -oP '^v[0-9]+')
+          git tag -fa "$MAJOR_TAG" -m "Release $MAJOR_TAG -> $TAG_VERSION"
+          git push origin "$MAJOR_TAG" --force
 
       - name: Release summary
         env:
