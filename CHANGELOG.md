@@ -1,16 +1,24 @@
 # Changelog
 
+## [v1.0.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.1) (2026-04-13)
+
+### 🤖 AI-generated summary
+In release v1.0.1, the main update involves a bug fix where the version of the GitHub Actions dependency "softprops/action-gh-release" was updated. This improvement is significant as it enhances the reliability and performance of the associated workflows, ensuring smoother automation for users.
+
+
+### 🐛 Bug fixes
+
+* fix(deps): bump softprops/action-gh-release in the github-actions group (#19) ([475c0c7](https://github.com/francisjgarcia/actions-templates/commit/475c0c7)) — dependabot[bot]
+
+
+
 ## [v1.0.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.0) (2026-04-11)
 
 ### 🤖 AI-generated summary
 In the v1.0.0 release, a significant breaking change was introduced with an update to the model, which needs users to adapt their implementations accordingly. This change aims to improve overall functionality and performance, ensuring a better user experience moving forward. Users should review the details to understand how the adjustments may impact their current setups.
-
-
 ### ⚠️ Breaking changes
 
 * feat!: Feat/fix model2 (#18) ([f59675c](https://github.com/francisjgarcia/actions-templates/commit/f59675c)) — Francis J. García
-
-
 
 ## [v0.10.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.10.0) (2026-04-11)
 
