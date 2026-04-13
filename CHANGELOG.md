@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.1) (2026-04-13)
+## [v1.0.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.2) (2026-04-13)
 
 ### 🤖 AI-generated summary
-In release v1.0.1, the main update involves a bug fix where the version of the GitHub Actions dependency "softprops/action-gh-release" was updated. This improvement is significant as it enhances the reliability and performance of the associated workflows, ensuring smoother automation for users.
+In release v1.0.2, a key bug fix was implemented to ensure that CodeQL scans are triggered correctly when changes are pushed to the main branch. This improvement enhances the workflow's reliability, helping users maintain better code quality and security by ensuring vulnerabilities are detected promptly.
 
 
 ### 🐛 Bug fixes
 
+* fix(workflow): ensure CodeQL runs on push to main branch (#20) ([ab7466a](https://github.com/francisjgarcia/actions-templates/commit/ab7466a)) — Francis J. García
+
+
+
+## [v1.0.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.1) (2026-04-13)
+
+### 🤖 AI-generated summary
+In release v1.0.1, the main update involves a bug fix where the version of the GitHub Actions dependency "softprops/action-gh-release" was updated. This improvement is significant as it enhances the reliability and performance of the associated workflows, ensuring smoother automation for users.
+### 🐛 Bug fixes
+
 * fix(deps): bump softprops/action-gh-release in the github-actions group (#19) ([475c0c7](https://github.com/francisjgarcia/actions-templates/commit/475c0c7)) — dependabot[bot]
-
-
 
 ## [v1.0.0](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.0) (2026-04-11)
 
