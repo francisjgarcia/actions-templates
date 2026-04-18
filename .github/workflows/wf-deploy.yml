@@ -101,10 +101,7 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Variables de entorno sensibles desde SECRET_ENV_VARS (secret)
-            # Soporta dos formatos:
-            #   - Plano: {"KEY": "value"} → aplica a todos los contenedores
-            #   - Por contenedor: {"container_name": {"KEY": "value"}} → aplica solo al contenedor indicado
+            # Variables de entorno sensibles desde secrets (SECRET_ENV_VARS)
             if [ -n "$SECRET_ENV_VARS" ] && [ "$SECRET_ENV_VARS" != "null" ]; then
               IS_PER_CONTAINER=$(echo "$SECRET_ENV_VARS" | jq -r "if has(\"$NAME\") then \"true\" else \"false\" end")
               if [ "$IS_PER_CONTAINER" = "true" ]; then
