@@ -101,20 +101,11 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Variables de entorno sensibles desde SECRET_ENV_VARS (secret)
-            # Soporta dos formatos:
-            #   - Plano: {"KEY": "value"} → aplica a todos los contenedores
-            #   - Por contenedor: {"container_name": {"KEY": "value"}} → aplica solo al contenedor indicado
-            if [ -n "$SECRET_ENV_VARS" ] && [ "$SECRET_ENV_VARS" != "null" ]; then
-              IS_PER_CONTAINER=$(echo "$SECRET_ENV_VARS" | jq -r "if has(\"$NAME\") then \"true\" else \"false\" end")
-              if [ "$IS_PER_CONTAINER" = "true" ]; then
-                SECRET_VARS=$(echo "$SECRET_ENV_VARS" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
-              else
-                SECRET_VARS=$(echo "$SECRET_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
-              fi
-              while IFS= read -r ENV_LINE; do
-                [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done <<< "$SECRET_VARS"
+            # Variables de entorno sensibles desde secrets (SECRET_ENV_VARS)
+            while IFS= read -r ENV_LINE; do
+              [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+            done < <(echo "$SECRET_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+
             fi
 
             # Healthcheck
