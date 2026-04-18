@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.2) (2026-04-13)
+## [v1.0.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.3) (2026-04-18)
 
 ### 🤖 AI-generated summary
-In release v1.0.2, a key bug fix was implemented to ensure that CodeQL scans are triggered correctly when changes are pushed to the main branch. This improvement enhances the workflow's reliability, helping users maintain better code quality and security by ensuring vulnerabilities are detected promptly.
+In release v1.0.3, a bug fix was implemented to update a secret variable, addressing an issue that may have affected user experience. This change improves the security and functionality of the application, ensuring that sensitive information is handled correctly.
 
 
 ### 🐛 Bug fixes
 
+* fix: update secret variable (#21) ([f7d9381](https://github.com/francisjgarcia/actions-templates/commit/f7d9381)) — Francis J. García
+
+
+
+## [v1.0.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.2) (2026-04-13)
+
+### 🤖 AI-generated summary
+In release v1.0.2, a key bug fix was implemented to ensure that CodeQL scans are triggered correctly when changes are pushed to the main branch. This improvement enhances the workflow's reliability, helping users maintain better code quality and security by ensuring vulnerabilities are detected promptly.
+### 🐛 Bug fixes
+
 * fix(workflow): ensure CodeQL runs on push to main branch (#20) ([ab7466a](https://github.com/francisjgarcia/actions-templates/commit/ab7466a)) — Francis J. García
-
-
 
 ## [v1.0.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.1) (2026-04-13)
 
