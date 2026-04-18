@@ -14,10 +14,11 @@ on:
         required: true
         type: string
         description: 'JSON array with container configurations (no secrets)'
-    secrets:
-      APP_ENV_VARS:
+      secret_env_vars:
         required: false
-        description: 'JSON object with sensitive env vars merged into all containers'
+        type: string
+        default: ''
+        description: 'JSON object with sensitive env vars (flat or per-container) merged into containers'
 
 jobs:
   deploy:
@@ -52,7 +53,7 @@ jobs:
 
       - name: Deploy containers
         env:
-          APP_ENV_VARS: ${{ secrets.APP_ENV_VARS }}
+          SECRET_ENV_VARS: ${{ inputs.secret_env_vars }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
@@ -100,12 +101,23 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Variables de entorno sensibles desde APP_ENV_VARS (secret)
-            if [ -n "$APP_ENV_VARS" ] && [ "$APP_ENV_VARS" != "null" ]; then
-              while IFS= read -r ENV_LINE; do
-                [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done < <(echo "$APP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
-            fi
+            # Variables de entorno sensibles desde SECRET_ENV_VARS (secret)
+            # Soporta dos formatos:
+            #   - Plano: {"KEY": "value"} → aplica a todos los contenedores
+            #   - Por contenedor: {"container_name": {"KEY": "value"}} → aplica solo al contenedor indicado
+            for SECRET_BLOCK in "$SECRET_ENV_VARS"; do
+              if [ -n "$SECRET_BLOCK" ] && [ "$SECRET_BLOCK" != "null" ]; then
+                IS_PER_CONTAINER=$(echo "$SECRET_BLOCK" | jq -r "if has(\"$NAME\") then \"true\" else \"false\" end")
+                if [ "$IS_PER_CONTAINER" = "true" ]; then
+                  SECRET_VARS=$(echo "$SECRET_BLOCK" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
+                else
+                  SECRET_VARS=$(echo "$SECRET_BLOCK" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+                fi
+                while IFS= read -r ENV_LINE; do
+                  [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+                done <<< "$SECRET_VARS"
+              fi
+            done
 
             # Healthcheck
             if [ -n "$HEALTHCHECK" ]; then
