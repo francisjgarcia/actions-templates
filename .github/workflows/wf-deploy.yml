@@ -58,6 +58,10 @@ jobs:
           CONTAINERS='${{ inputs.containers }}'
           if [ -n "$SECRET_ENV_VARS_B64" ] && [ "$SECRET_ENV_VARS_B64" != "null" ]; then
             SECRET_ENV_VARS=$(echo "$SECRET_ENV_VARS_B64" | base64 -d)
+            # Mask all secret values to prevent them from appearing in logs
+            while IFS= read -r secret_val; do
+              [ -n "$secret_val" ] && echo "::add-mask::$secret_val"
+            done < <(echo "$SECRET_ENV_VARS" | jq -r '.. | strings')
           else
             SECRET_ENV_VARS=""
           fi
