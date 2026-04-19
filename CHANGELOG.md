@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.14](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.14) (2026-04-19)
+## [v1.0.15](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.15) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.14, the handling of APP_ENV_SECRETS during deployment has been updated, addressing a bug that may have affected proper configuration management. This fix enhances the overall reliability of the deployment process, ensuring users can manage their application environment variables more effectively.
+In release v1.0.15, notable improvements were made to enhance the memory and network handling for containers during deployment. These changes aim to optimize performance, ensuring a more reliable and efficient experience for users when managing their containerized applications. This fix addresses potential issues that could affect the stability and responsiveness of deployments.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): improve memory and network handling for containers ([44823be](https://github.com/francisjgarcia/actions-templates/commit/44823be)) — Francis J. García
+
+
+
+## [v1.0.14](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.14) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.14, the handling of APP_ENV_SECRETS during deployment has been updated, addressing a bug that may have affected proper configuration management. This fix enhances the overall reliability of the deployment process, ensuring users can manage their application environment variables more effectively.
+### 🐛 Bug fixes
+
 * fix(deploy): update handling of APP_ENV_SECRETS ([540496d](https://github.com/francisjgarcia/actions-templates/commit/540496d)) — Francis J. García
-
-
 
 ## [v1.0.13](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.13) (2026-04-19)
 
