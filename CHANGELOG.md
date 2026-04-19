@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.12](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.12) (2026-04-19)
+## [v1.0.13](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.13) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.12, the input variable for deployment was renamed from "secret_env_vars" to "app_env_vars." This change clarifies the purpose of the variable, making it easier for users to understand and manage their environment settings during deployment.
+In the release v1.0.13, a key change was made to improve clarity and functionality by renaming the input variable from "app_env_vars" to "app_env_secrets." This update addresses potential confusion among users, ensuring that the variable accurately reflects its purpose in managing sensitive environment variables.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): rename input variable from app_env_vars to app_env_secrets ([35f7e82](https://github.com/francisjgarcia/actions-templates/commit/35f7e82)) — Francis J. García
+
+
+
+## [v1.0.12](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.12) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.12, the input variable for deployment was renamed from "secret_env_vars" to "app_env_vars." This change clarifies the purpose of the variable, making it easier for users to understand and manage their environment settings during deployment.
+### 🐛 Bug fixes
+
 * fix(deploy): rename input variable from secret_env_vars to app_env_vars ([4b570ad](https://github.com/francisjgarcia/actions-templates/commit/4b570ad)) — Francis J. García
-
-
 
 ## [v1.0.11](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.11) (2026-04-19)
 
