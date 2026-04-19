@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.4](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.4) (2026-04-18)
+## [v1.0.5](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.5) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.4, the handling of sensitive environment variables within workflows has been simplified, making it easier for users to manage these variables securely. This improvement enhances the overall usability and security of the software, ensuring that users can focus on their tasks without worrying about complex configurations.
+In release v1.0.5, the handling of environment variables has been simplified, addressing a prior complexity that users faced. This change aims to improve usability and clarity, making it easier for users to manage environment settings within the application.
 
 
 ### 🐛 Bug fixes
 
+* fix: simplify handling env (#23) ([c435e68](https://github.com/francisjgarcia/actions-templates/commit/c435e68)) — Francis J. García
+
+
+
+## [v1.0.4](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.4) (2026-04-18)
+
+### 🤖 AI-generated summary
+In release v1.0.4, the handling of sensitive environment variables within workflows has been simplified, making it easier for users to manage these variables securely. This improvement enhances the overall usability and security of the software, ensuring that users can focus on their tasks without worrying about complex configurations.
+### 🐛 Bug fixes
+
 * fix(workflow): simplify handling of sensitive environment variables (#22) ([9153a3f](https://github.com/francisjgarcia/actions-templates/commit/9153a3f)) — Francis J. García
-
-
 
 ## [v1.0.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.3) (2026-04-18)
 
