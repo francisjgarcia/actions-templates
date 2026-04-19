@@ -25,7 +25,6 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-    environment: production
     if: inputs.tag_version != ''
     permissions:
       contents: write

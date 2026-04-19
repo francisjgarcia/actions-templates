@@ -21,7 +21,6 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    environment: production
     if: inputs.tag_version != ''
     permissions:
       packages: read

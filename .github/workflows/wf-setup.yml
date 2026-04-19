@@ -16,7 +16,6 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    environment: production
     permissions:
       contents: read
     outputs:
@@ -56,7 +55,6 @@ jobs:
           {
             echo "## Setup summary"
             echo "### Output variables"
-            echo "- Environment: production"
           } >> "$GITHUB_STEP_SUMMARY"
           if [[ -n "${{ steps.tag.outputs.tag_version }}" ]]; then
             TAG_URL="https://github.com/${GITHUB_REPOSITORY}/releases/tag/${{ steps.tag.outputs.tag_version }}"

@@ -35,7 +35,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
     if: inputs.tag_version != ''
     permissions:
       contents: read
