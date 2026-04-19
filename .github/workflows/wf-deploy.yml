@@ -56,19 +56,22 @@ jobs:
           SECRET_ENV_VARS_B64: ${{ inputs.secret_env_vars }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
+
+          # Decode and mask secret values to prevent them from appearing in logs
           if [ -n "$SECRET_ENV_VARS_B64" ] && [ "$SECRET_ENV_VARS_B64" != "null" ]; then
             SECRET_ENV_VARS=$(echo "$SECRET_ENV_VARS_B64" | base64 -d)
-            # Mask all secret values to prevent them from appearing in logs
             while IFS= read -r secret_val; do
               [ -n "$secret_val" ] && echo "::add-mask::$secret_val"
             done < <(echo "$SECRET_ENV_VARS" | jq -r '.. | strings')
           else
             SECRET_ENV_VARS=""
           fi
+
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
           echo "Deploying $CONTAINER_COUNT container(s)..."
 
-          echo "$CONTAINERS" | jq -c '.[]' | while read -r CONTAINER; do
+          # Use process substitution to avoid subshell so SECRET_ENV_VARS is accessible
+          while IFS= read -r CONTAINER; do
             NAME=$(echo "$CONTAINER"        | jq -r '.name')
             IMAGE=$(echo "$CONTAINER"       | jq -r '.image')
             NETWORK=$(echo "$CONTAINER"     | jq -r '.network')
@@ -111,16 +114,12 @@ jobs:
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
             # Variables de entorno sensibles desde secrets (SECRET_ENV_VARS)
-            if [ -n "$SECRET_ENV_VARS" ] && [ "$SECRET_ENV_VARS" != "null" ]; then
-              IS_PER_CONTAINER=$(echo "$SECRET_ENV_VARS" | jq -r "if has(\"$NAME\") then \"true\" else \"false\" end")
-              if [ "$IS_PER_CONTAINER" = "true" ]; then
-                SECRET_VARS=$(echo "$SECRET_ENV_VARS" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
-              else
-                SECRET_VARS=$(echo "$SECRET_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+            if [ -n "$SECRET_ENV_VARS" ]; then
+              if echo "$SECRET_ENV_VARS" | jq -e "has(\"$NAME\")" > /dev/null 2>&1; then
+                while IFS= read -r ENV_LINE; do
+                  [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+                done < <(echo "$SECRET_ENV_VARS" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
               fi
-              while IFS= read -r ENV_LINE; do
-                [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done <<< "$SECRET_VARS"
             fi
 
             # Healthcheck
@@ -136,7 +135,7 @@ jobs:
 
             CMD+=("$IMAGE")
 
-            echo "Running: ${CMD[*]}"
+            echo "Launching container: $NAME"
             "${CMD[@]}"
 
             echo "Container $NAME deployed successfully."
@@ -149,7 +148,7 @@ jobs:
               fi
             done < <(echo "$CONTAINER" | jq -r '(.extra_networks // [])[]')
 
-          done
+          done < <(echo "$CONTAINERS" | jq -c '.[]')
 
       - name: Remove old images
         run: |
