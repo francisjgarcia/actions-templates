@@ -53,9 +53,14 @@ jobs:
 
       - name: Deploy containers
         env:
-          SECRET_ENV_VARS: ${{ inputs.secret_env_vars }}
+          SECRET_ENV_VARS_B64: ${{ inputs.secret_env_vars }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
+          if [ -n "$SECRET_ENV_VARS_B64" ] && [ "$SECRET_ENV_VARS_B64" != "null" ]; then
+            SECRET_ENV_VARS=$(echo "$SECRET_ENV_VARS_B64" | base64 -d)
+          else
+            SECRET_ENV_VARS=""
+          fi
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
           echo "Deploying $CONTAINER_COUNT container(s)..."
 
