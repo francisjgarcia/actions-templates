@@ -118,6 +118,7 @@ jobs:
               if echo "$SECRET_ENV_VARS" | jq -e "has(\"$NAME\")" > /dev/null 2>&1; then
                 while IFS= read -r ENV_LINE; do
                   [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+                  echo "Added secret env var for $NAME: ${ENV_LINE%%=*}=***"
                 done < <(echo "$SECRET_ENV_VARS" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
               fi
             fi
