@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.6](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.6) (2026-04-19)
+## [v1.0.7](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.7) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In the release v1.0.6, the handling of environment variables has been simplified, addressing a previous issue. This improvement enhances usability, making it easier for users to manage their environment configurations effectively.
+In release v1.0.7, the handling of environment variables has been simplified, addressing a previously complex issue. This fix enhances overall usability, making it easier for users to manage their environment settings efficiently.
 
 
 ### 🐛 Bug fixes
 
+* fix: simplify handling env (#25) ([25fefd6](https://github.com/francisjgarcia/actions-templates/commit/25fefd6)) — Francis J. García
+
+
+
+## [v1.0.6](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.6) (2026-04-19)
+
+### 🤖 AI-generated summary
+In the release v1.0.6, the handling of environment variables has been simplified, addressing a previous issue. This improvement enhances usability, making it easier for users to manage their environment configurations effectively.
+### 🐛 Bug fixes
+
 * fix: simplify handling env (#24) ([9cd8ff2](https://github.com/francisjgarcia/actions-templates/commit/9cd8ff2)) — Francis J. García
-
-
 
 ## [v1.0.5](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.5) (2026-04-19)
 
