@@ -13,11 +13,11 @@ on:
         required: true
         type: string
         description: 'JSON array with container configurations (no secrets)'
-      app_env_vars:
+      app_env_secrets:
         required: false
         type: string
         default: ''
-        description: 'JSON object with sensitive env vars merged into all containers'
+        description: 'JSON object with secret env vars (values base64-encoded) merged into all containers'
 
 jobs:
   deploy:
@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy containers
         env:
-          APP_ENV_VARS: ${{ inputs.app_env_vars }}
+          APP_ENV_SECRETS: ${{ inputs.app_env_secrets }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
@@ -100,11 +100,11 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Sensitive env vars from app_env_vars input (merged into all containers)
-            if [ -n "$APP_ENV_VARS" ] && [ "$APP_ENV_VARS" != "null" ]; then
+            # Secret env vars from app_env_secrets input (values are base64-encoded)
+            if [ -n "$APP_ENV_SECRETS" ] && [ "$APP_ENV_SECRETS" != "null" ]; then
               while IFS= read -r ENV_LINE; do
                 [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done < <(echo "$APP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+              done < <(echo "$APP_ENV_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value | @base64d)"')
             fi
 
             # Healthcheck
