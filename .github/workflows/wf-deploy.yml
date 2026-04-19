@@ -60,9 +60,15 @@ jobs:
           while IFS= read -r CONTAINER; do
             NAME=$(echo "$CONTAINER"        | jq -r '.name')
             IMAGE=$(echo "$CONTAINER"       | jq -r '.image')
-            NETWORK=$(echo "$CONTAINER"     | jq -r '.network')
-            MEMORY=$(echo "$CONTAINER"      | jq -r '.memory_limit // "512m"')
-            MEMORY_RES=$(echo "$CONTAINER"  | jq -r '.memory_reservation // "256m"')
+            NETWORK=$(echo "$CONTAINER"     | jq -r '.network // empty')
+            MEMORY=$(echo "$CONTAINER"      | jq -r '.memory_limit // empty')
+            if [ -z "$MEMORY" ] || [ "$MEMORY" = "null" ]; then
+              MEMORY="512m"
+            fi
+            MEMORY_RES=$(echo "$CONTAINER"  | jq -r '.memory_reservation // empty')
+            if [ -z "$MEMORY_RES" ] || [ "$MEMORY_RES" = "null" ]; then
+              MEMORY_RES="256m"
+            fi
             HEALTHCHECK=$(echo "$CONTAINER" | jq -r '.healthcheck_url // ""')
             RESTART=$(echo "$CONTAINER"     | jq -r '.restart_policy // "always"')
 
@@ -78,9 +84,6 @@ jobs:
             CMD=(docker run -d
               --name "$NAME"
               --hostname "$NAME"
-              --network "$NETWORK"
-              --memory="$MEMORY"
-              --memory-reservation="$MEMORY_RES"
               --restart "$RESTART"
             )
 
@@ -98,6 +101,12 @@ jobs:
             while IFS= read -r ENV_LINE; do
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
+
+            # Add network and memory flags only when appropriate
+            if [ -n "$NETWORK" ]; then
+              CMD+=(--network "$NETWORK")
+            fi
+            CMD+=(--memory "$MEMORY" --memory-reservation "$MEMORY_RES")
 
             # Arbitrary per-repo secrets passed via workflow_call.secrets.DEPLOY_SECRETS
             # APP_ENV_SECRETS may be raw JSON or base64-encoded JSON
