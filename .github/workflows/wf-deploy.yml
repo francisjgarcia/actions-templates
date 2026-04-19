@@ -13,7 +13,7 @@ on:
         required: true
         type: string
         description: 'JSON array with container configurations (no secrets)'
-      app_env_vars:
+      secret_env_vars:
         required: false
         type: string
         default: ''
@@ -52,7 +52,7 @@ jobs:
 
       - name: Deploy containers
         env:
-          APP_ENV_VARS: ${{ inputs.app_env_vars }}
+          SECRET_ENV_VARS: ${{ inputs.secret_env_vars }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
@@ -100,11 +100,11 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Sensitive env vars from app_env_vars input (merged into all containers)
-            if [ -n "$APP_ENV_VARS" ] && [ "$APP_ENV_VARS" != "null" ]; then
+            # Sensitive env vars from secret_env_vars input (merged into all containers)
+            if [ -n "$SECRET_ENV_VARS" ] && [ "$SECRET_ENV_VARS" != "null" ]; then
               while IFS= read -r ENV_LINE; do
                 [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done < <(echo "$APP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+              done < <(echo "$SECRET_ENV_VARS" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"')
             fi
 
             # Healthcheck
