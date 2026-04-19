@@ -1,4 +1,3 @@
----
 name: Deploy (Reusable)
 
 on:
@@ -14,11 +13,11 @@ on:
         required: true
         type: string
         description: 'JSON array with container configurations (no secrets)'
-      secret_env_vars:
+      app_env_vars:
         required: false
         type: string
         default: ''
-        description: 'JSON object with sensitive env vars (flat or per-container) merged into containers'
+        description: 'JSON object with sensitive env vars merged into all containers'
 
 jobs:
   deploy:
@@ -30,7 +29,7 @@ jobs:
 
     steps:
       - name: Login to GitHub Container Registry
-        uses: docker/login-action@v4
+        uses: docker/login-action@v3.3.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -53,24 +52,12 @@ jobs:
 
       - name: Deploy containers
         env:
-          SECRET_ENV_VARS_B64: ${{ inputs.secret_env_vars }}
+          APP_ENV_VARS: ${{ inputs.app_env_vars }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
-
-          # Decode and mask secret values to prevent them from appearing in logs
-          if [ -n "$SECRET_ENV_VARS_B64" ] && [ "$SECRET_ENV_VARS_B64" != "null" ]; then
-            SECRET_ENV_VARS=$(echo "$SECRET_ENV_VARS_B64" | base64 -d)
-            while IFS= read -r secret_val; do
-              [ -n "$secret_val" ] && echo "::add-mask::$secret_val"
-            done < <(echo "$SECRET_ENV_VARS" | jq -r '.. | strings')
-          else
-            SECRET_ENV_VARS=""
-          fi
-
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
           echo "Deploying $CONTAINER_COUNT container(s)..."
 
-          # Use process substitution to avoid subshell so SECRET_ENV_VARS is accessible
           while IFS= read -r CONTAINER; do
             NAME=$(echo "$CONTAINER"        | jq -r '.name')
             IMAGE=$(echo "$CONTAINER"       | jq -r '.image')
@@ -98,29 +85,26 @@ jobs:
               --restart "$RESTART"
             )
 
-            # Puertos
+            # Ports
             while IFS= read -r PORT; do
               [ -n "$PORT" ] && CMD+=(-p "$PORT")
             done < <(echo "$CONTAINER" | jq -r '(.ports // [])[]')
 
-            # Volúmenes
+            # Volumes
             while IFS= read -r VOLUME; do
               [ -n "$VOLUME" ] && CMD+=(-v "$VOLUME")
             done < <(echo "$CONTAINER" | jq -r '(.volumes // [])[]')
 
-            # Variables de entorno del contenedor (no sensibles)
+            # Non-sensitive env vars from container definition
             while IFS= read -r ENV_LINE; do
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Variables de entorno sensibles desde secrets (SECRET_ENV_VARS)
-            if [ -n "$SECRET_ENV_VARS" ]; then
-              if echo "$SECRET_ENV_VARS" | jq -e "has(\"$NAME\")" > /dev/null 2>&1; then
-                while IFS= read -r ENV_LINE; do
-                  [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-                  echo "Added secret env var for $NAME: ${ENV_LINE%%=*}=***"
-                done < <(echo "$SECRET_ENV_VARS" | jq -r ".\"$NAME\" | to_entries[] | \"\(.key)=\(.value)\"")
-              fi
+            # Sensitive env vars from app_env_vars input (merged into all containers)
+            if [ -n "$APP_ENV_VARS" ] && [ "$APP_ENV_VARS" != "null" ]; then
+              while IFS= read -r ENV_LINE; do
+                [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+              done < <(echo "$APP_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
             fi
 
             # Healthcheck
@@ -141,7 +125,7 @@ jobs:
 
             echo "Container $NAME deployed successfully."
 
-            # Redes adicionales
+            # Extra networks
             while IFS= read -r EXTRA_NET; do
               if [ -n "$EXTRA_NET" ]; then
                 echo "Connecting $NAME to extra network: $EXTRA_NET"
