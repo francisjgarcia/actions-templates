@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.7](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.7) (2026-04-19)
+## [v1.0.8](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.8) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.7, the handling of environment variables has been simplified, addressing a previously complex issue. This fix enhances overall usability, making it easier for users to manage their environment settings efficiently.
+In release v1.0.8, a bug fix was implemented to improve the deployment process by adding logs for secret environment variables. This enhancement is significant for users as it increases transparency and accountability during deployment, making it easier to track and manage sensitive configurations.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): log added secret environment variables ([1d98ae8](https://github.com/francisjgarcia/actions-templates/commit/1d98ae8)) — Francis J. García
+
+
+
+## [v1.0.7](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.7) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.7, the handling of environment variables has been simplified, addressing a previously complex issue. This fix enhances overall usability, making it easier for users to manage their environment settings efficiently.
+### 🐛 Bug fixes
+
 * fix: simplify handling env (#25) ([25fefd6](https://github.com/francisjgarcia/actions-templates/commit/25fefd6)) — Francis J. García
-
-
 
 ## [v1.0.6](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.6) (2026-04-19)
 
