@@ -1,16 +1,29 @@
 # Changelog
 
-## [v1.0.15](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.15) (2026-04-19)
+## [v1.0.16](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.16) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.15, notable improvements were made to enhance the memory and network handling for containers during deployment. These changes aim to optimize performance, ensuring a more reliable and efficient experience for users when managing their containerized applications. This fix addresses potential issues that could affect the stability and responsiveness of deployments.
+In release v1.0.16, key bug fixes were implemented, including a rename of APP_ID to APP_CLIENT_ID in the workflow configuration file, which enhances clarity and accuracy for users. Additionally, the permissions and parameters for actionlint were updated in another workflow, ensuring a smoother action execution process. Other improvements include the removal of 'environment: production' from the workflow files, which simplifies the workflow setup and could lead to fewer configuration issues. These changes collectively enhance the reliability and usability of the workflows.
 
 
 ### 🐛 Bug fixes
 
+* fix(workflows): rename APP_ID to APP_CLIENT_ID in wf-release.yml ([0ac6cf1](https://github.com/francisjgarcia/actions-templates/commit/0ac6cf1)) — Francis J. García
+* fix(workflows): update permissions and parameters for actionlint in wf-lint.yml ([e6fc3a3](https://github.com/francisjgarcia/actions-templates/commit/e6fc3a3)) — Francis J. García
+
+### 🔧 Other changes
+
+* chore(workflows): remove 'environment: production' from workflow files ([0815fdd](https://github.com/francisjgarcia/actions-templates/commit/0815fdd)) — Francis J. García
+
+
+
+## [v1.0.15](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.15) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.15, notable improvements were made to enhance the memory and network handling for containers during deployment. These changes aim to optimize performance, ensuring a more reliable and efficient experience for users when managing their containerized applications. This fix addresses potential issues that could affect the stability and responsiveness of deployments.
+### 🐛 Bug fixes
+
 * fix(deploy): improve memory and network handling for containers ([44823be](https://github.com/francisjgarcia/actions-templates/commit/44823be)) — Francis J. García
-
-
 
 ## [v1.0.14](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.14) (2026-04-19)
 
