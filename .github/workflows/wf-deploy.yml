@@ -104,7 +104,7 @@ jobs:
             if [ -n "$SECRET_ENV_VARS" ] && [ "$SECRET_ENV_VARS" != "null" ]; then
               while IFS= read -r ENV_LINE; do
                 [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done < <(echo "$SECRET_ENV_VARS" | base64 --decode | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+              done < <(echo "$SECRET_ENV_VARS" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
             fi
 
             # Healthcheck
