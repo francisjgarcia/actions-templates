@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.11](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.11) (2026-04-19)
+## [v1.0.12](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.12) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.11, the handling of secret environment variables in the workflow deployment file (wf-deploy.yml) has been updated to improve security and functionality. This fix ensures that sensitive information is better managed during deployment, enhancing overall reliability and protecting user data.
+In release v1.0.12, the input variable for deployment was renamed from "secret_env_vars" to "app_env_vars." This change clarifies the purpose of the variable, making it easier for users to understand and manage their environment settings during deployment.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): rename input variable from secret_env_vars to app_env_vars ([4b570ad](https://github.com/francisjgarcia/actions-templates/commit/4b570ad)) — Francis J. García
+
+
+
+## [v1.0.11](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.11) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.11, the handling of secret environment variables in the workflow deployment file (wf-deploy.yml) has been updated to improve security and functionality. This fix ensures that sensitive information is better managed during deployment, enhancing overall reliability and protecting user data.
+### 🐛 Bug fixes
+
 * fix(deploy): update secret environment variable handling in wf-deploy.yml ([b35ff65](https://github.com/francisjgarcia/actions-templates/commit/b35ff65)) — Francis J. García
-
-
 
 ## [v1.0.10](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.10) (2026-04-19)
 
