@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.9](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.9) (2026-04-19)
+## [v1.0.10](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.10) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.9, the handling of environment variables in the wf-deploy.yml file was updated to address issues with deployment processes. This fix is important for users as it improves the reliability of their deployments, ensuring that environment variables are managed correctly during the deployment workflow.
+In release v1.0.10, a bug fix was implemented to rename "app_env_vars" to "secret_env_vars" in the wf-deploy.yml file. This change is significant as it improves clarity in the deployment configuration, ensuring that users can more easily manage sensitive environment variables.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): rename app_env_vars to secret_env_vars in wf-deploy.yml ([dfbb071](https://github.com/francisjgarcia/actions-templates/commit/dfbb071)) — Francis J. García
+
+
+
+## [v1.0.9](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.9) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.9, the handling of environment variables in the wf-deploy.yml file was updated to address issues with deployment processes. This fix is important for users as it improves the reliability of their deployments, ensuring that environment variables are managed correctly during the deployment workflow.
+### 🐛 Bug fixes
+
 * fix(deploy): update environment variable handling in wf-deploy.yml ([ea273ac](https://github.com/francisjgarcia/actions-templates/commit/ea273ac)) — Francis J. García
-
-
 
 ## [v1.0.8](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.8) (2026-04-19)
 
