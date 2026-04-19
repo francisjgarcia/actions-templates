@@ -13,11 +13,10 @@ on:
         required: true
         type: string
         description: 'JSON array with container configurations (no secrets)'
-      app_env_secrets:
+    secrets:
+      APP_ENV_SECRETS:
         required: false
-        type: string
-        default: ''
-        description: 'JSON object with secret env vars (values base64-encoded) merged into all containers'
+        description: 'JSON or base64-encoded JSON with arbitrary secret key/values per-repo'
 
 jobs:
   deploy:
@@ -52,7 +51,7 @@ jobs:
 
       - name: Deploy containers
         env:
-          APP_ENV_SECRETS: ${{ inputs.app_env_secrets }}
+          APP_ENV_SECRETS: ${{ secrets.APP_ENV_SECRETS }}
         run: |
           CONTAINERS='${{ inputs.containers }}'
           CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
@@ -100,11 +99,15 @@ jobs:
               [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
             done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
 
-            # Secret env vars from app_env_secrets input (values are base64-encoded)
+            # Arbitrary per-repo secrets passed via workflow_call.secrets.DEPLOY_SECRETS
+            # APP_ENV_SECRETS may be raw JSON or base64-encoded JSON
             if [ -n "$APP_ENV_SECRETS" ] && [ "$APP_ENV_SECRETS" != "null" ]; then
-              while IFS= read -r ENV_LINE; do
-                [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
-              done < <(echo "$APP_ENV_SECRETS" | jq -r 'to_entries[] | "\(.key)=\(.value | @base64d)"')
+              SECRETS_JSON=$(echo -n "$APP_ENV_SECRETS" | base64 -d 2>/dev/null || echo "$APP_ENV_SECRETS")
+              if [ -n "$SECRETS_JSON" ] && [ "$SECRETS_JSON" != "null" ]; then
+                while IFS= read -r ENV_LINE; do
+                  [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+                done < <(echo "$SECRETS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+              fi
             fi
 
             # Healthcheck
