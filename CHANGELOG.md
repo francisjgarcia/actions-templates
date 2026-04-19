@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.8](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.8) (2026-04-19)
+## [v1.0.9](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.9) (2026-04-19)
 
 ### 🤖 AI-generated summary
-In release v1.0.8, a bug fix was implemented to improve the deployment process by adding logs for secret environment variables. This enhancement is significant for users as it increases transparency and accountability during deployment, making it easier to track and manage sensitive configurations.
+In release v1.0.9, the handling of environment variables in the wf-deploy.yml file was updated to address issues with deployment processes. This fix is important for users as it improves the reliability of their deployments, ensuring that environment variables are managed correctly during the deployment workflow.
 
 
 ### 🐛 Bug fixes
 
+* fix(deploy): update environment variable handling in wf-deploy.yml ([ea273ac](https://github.com/francisjgarcia/actions-templates/commit/ea273ac)) — Francis J. García
+
+
+
+## [v1.0.8](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.8) (2026-04-19)
+
+### 🤖 AI-generated summary
+In release v1.0.8, a bug fix was implemented to improve the deployment process by adding logs for secret environment variables. This enhancement is significant for users as it increases transparency and accountability during deployment, making it easier to track and manage sensitive configurations.
+### 🐛 Bug fixes
+
 * fix(deploy): log added secret environment variables ([1d98ae8](https://github.com/francisjgarcia/actions-templates/commit/1d98ae8)) — Francis J. García
-
-
 
 ## [v1.0.7](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.7) (2026-04-19)
 
