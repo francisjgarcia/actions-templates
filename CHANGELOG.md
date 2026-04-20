@@ -1,11 +1,21 @@
 # Changelog
 
+## [v1.0.17](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.17) (2026-04-20)
+
+### 🤖 AI-generated summary
+In release v1.0.17, a key update was made by bumping the docker/login-action dependency in the GitHub Actions group. This change addresses a dependency issue, ensuring smoother integration and functionality within the workflow. Users can expect improved stability and performance as a result.
+
+
+### 🐛 Bug fixes
+
+* fix(deps): bump docker/login-action in the github-actions group (#26) ([0776413](https://github.com/francisjgarcia/actions-templates/commit/0776413)) — dependabot[bot]
+
+
+
 ## [v1.0.16](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.16) (2026-04-19)
 
 ### 🤖 AI-generated summary
 In release v1.0.16, key bug fixes were implemented, including a rename of APP_ID to APP_CLIENT_ID in the workflow configuration file, which enhances clarity and accuracy for users. Additionally, the permissions and parameters for actionlint were updated in another workflow, ensuring a smoother action execution process. Other improvements include the removal of 'environment: production' from the workflow files, which simplifies the workflow setup and could lead to fewer configuration issues. These changes collectively enhance the reliability and usability of the workflows.
-
-
 ### 🐛 Bug fixes
 
 * fix(workflows): rename APP_ID to APP_CLIENT_ID in wf-release.yml ([0ac6cf1](https://github.com/francisjgarcia/actions-templates/commit/0ac6cf1)) — Francis J. García
@@ -14,8 +24,6 @@ In release v1.0.16, key bug fixes were implemented, including a rename of APP_ID
 ### 🔧 Other changes
 
 * chore(workflows): remove 'environment: production' from workflow files ([0815fdd](https://github.com/francisjgarcia/actions-templates/commit/0815fdd)) — Francis J. García
-
-
 
 ## [v1.0.15](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.15) (2026-04-19)
 
