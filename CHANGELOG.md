@@ -1,16 +1,24 @@
 # Changelog
 
-## [v1.0.17](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.17) (2026-04-20)
+## [v1.0.18](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.18) (2026-05-30)
 
 ### 🤖 AI-generated summary
-In release v1.0.17, a key update was made by bumping the docker/login-action dependency in the GitHub Actions group. This change addresses a dependency issue, ensuring smoother integration and functionality within the workflow. Users can expect improved stability and performance as a result.
+In the v1.0.18 release, a critical bug was fixed concerning the parameter name for the GitHub app token in workflows. This correction ensures smoother integration and functionality for users relying on this feature, ultimately enhancing the overall user experience.
 
 
 ### 🐛 Bug fixes
 
+* fix(workflows): correct parameter name for GitHub app token ([dbd10f0](https://github.com/francisjgarcia/actions-templates/commit/dbd10f0)) — Francis J. García
+
+
+
+## [v1.0.17](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.17) (2026-04-20)
+
+### 🤖 AI-generated summary
+In release v1.0.17, a key update was made by bumping the docker/login-action dependency in the GitHub Actions group. This change addresses a dependency issue, ensuring smoother integration and functionality within the workflow. Users can expect improved stability and performance as a result.
+### 🐛 Bug fixes
+
 * fix(deps): bump docker/login-action in the github-actions group (#26) ([0776413](https://github.com/francisjgarcia/actions-templates/commit/0776413)) — dependabot[bot]
-
-
 
 ## [v1.0.16](https://github.com/francisjgarcia/actions-templates/releases/tag/v1.0.16) (2026-04-19)
 
