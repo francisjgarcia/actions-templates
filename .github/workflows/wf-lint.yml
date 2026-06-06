@@ -1,0 +1,99 @@
+---
+name: Lint (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      yamllint_paths:
+        required: false
+        type: string
+        default: '.github/workflows/'
+        description: 'Newline-separated list of paths to lint with yamllint'
+      yamllint_max_line_length:
+        required: false
+        type: number
+        default: 180
+        description: 'Maximum line length for yamllint'
+
+jobs:
+  yamllint:
+    name: Lint YAML
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run yamllint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+
+            rules:
+              line-length:
+                max: ${{ inputs.yamllint_max_line_length }}
+                level: warning
+              indentation:
+                spaces: 2
+              trailing-spaces:
+                level: error
+              document-start:
+                level: error
+              truthy:
+                level: warning
+                allowed-values: ['true', 'false', 'on', 'off']
+              braces:
+                min-spaces-inside: 0
+                max-spaces-inside: 1
+              comments:
+                min-spaces-from-content: 1
+              colons:
+                max-spaces-before: 0
+                max-spaces-after: 1
+                level: error
+              new-line-at-end-of-file:
+                level: error
+              comments-indentation:
+                level: warning
+          file_or_dir: ${{ inputs.yamllint_paths }}
+
+      - name: Yamllint summary
+        if: always()
+        env:
+          YAMLLINT_PATHS: ${{ inputs.yamllint_paths }}
+        run: |
+          YAMLLINT_PATHS_INLINE=$(echo "$YAMLLINT_PATHS" | tr '\n' ' ' | sed 's/ $//')
+          {
+            echo "## Lint summary"
+            echo "| Check | Paths | Result |"
+            echo "| --- | --- | --- |"
+            echo "| yamllint | \`${YAMLLINT_PATHS_INLINE}\` | ✅ Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  actionlint:
+    name: Lint workflows
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run actionlint
+        uses: rhysd/actionlint@v1.7.12
+        with:
+          args: -color
+
+      - name: Actionlint summary
+        if: always()
+        run: |
+          {
+            echo "## Lint summary"
+            echo "| Check | Result |"
+            echo "| --- | --- |"
+            echo "| actionlint | ✅ Passed |"
+          } >> "$GITHUB_STEP_SUMMARY"

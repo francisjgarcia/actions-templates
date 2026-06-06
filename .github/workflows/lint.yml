@@ -1,0 +1,23 @@
+---
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - edited
+      - synchronize
+      - reopened
+
+jobs:
+  lint:
+    name: Lint workflows and actions
+    permissions:
+      contents: read
+    uses: ./.github/workflows/wf-lint.yml
+    with:
+      yamllint_paths: |
+        .github/workflows/
+        actions/

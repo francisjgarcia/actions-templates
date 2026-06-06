@@ -1,0 +1,177 @@
+---
+name: Release (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      bump_type:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      changelog_entries:
+        required: true
+        type: string
+      APP_CLIENT_ID:
+        required: true
+        type: string
+    secrets:
+      APP_PRIVATE_KEY:
+        required: true
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: inputs.tag_version != ''
+    permissions:
+      contents: write
+      models: read
+
+    steps:
+      - name: Generate app token
+        id: app_token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ inputs.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app_token.outputs.token }}
+
+      - name: Setup git identity
+        run: |
+          git config --global user.name "actions-templates-bot[bot]"
+          git config --global user.email "actions-templates-bot[bot]@users.noreply.github.com"
+
+      - name: Generate AI release notes
+        id: ai_notes
+        continue-on-error: true
+        uses: actions/ai-inference@v2
+        with:
+          model: openai/gpt-4o-mini
+          max-completion-tokens: 300
+          system-prompt: >-
+            You are a helpful assistant that summarizes software release notes.
+            Be concise, human-friendly, and do not use bullet points.
+          prompt: |-
+            Summarize the following changelog entries for release ${{ inputs.tag_version }}
+            in a concise, human-friendly paragraph (2-4 sentences).
+            Focus on what changed and why it matters to users.
+
+            ${{ inputs.changelog_entries }}
+
+      - name: Update CHANGELOG.md
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+          AI_NOTES: ${{ steps.ai_notes.outputs.response }}
+        run: |
+          TEMP_ENTRIES=$(mktemp)
+          echo "$CHANGELOG_ENTRIES" > "$TEMP_ENTRIES"
+
+          TEMP_CHANGELOG=$(mktemp)
+          {
+            echo "# Changelog"
+            echo ""
+            echo "## [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) ($(date +'%Y-%m-%d'))"
+            echo ""
+            if [ -n "$AI_NOTES" ]; then
+              echo "### 🤖 AI-generated summary"
+              echo "$AI_NOTES"
+              echo ""
+            fi
+            cat "$TEMP_ENTRIES"
+            echo ""
+          } > "$TEMP_CHANGELOG"
+
+          if [ -f CHANGELOG.md ]; then
+            sed '/^# Changelog$/d' CHANGELOG.md | sed '/^$/N;/^\n$/d' >> "$TEMP_CHANGELOG"
+          fi
+
+          mv "$TEMP_CHANGELOG" CHANGELOG.md
+          rm -f "$TEMP_ENTRIES"
+
+          echo "CHANGELOG.md updated:"
+          cat CHANGELOG.md
+
+      - name: Stage CHANGELOG.md
+        run: git add CHANGELOG.md
+
+      - name: Commit and push CHANGELOG.md
+        uses: qoomon/actions--create-commit@v1
+        with:
+          message: "docs: update CHANGELOG.md for ${{ inputs.tag_version }}"
+          skip-empty: true
+
+      - name: Push
+        run: git push
+
+      - name: Prepare release body
+        env:
+          AI_NOTES: ${{ steps.ai_notes.outputs.response }}
+          BUMP_TYPE: ${{ inputs.bump_type }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+        run: |
+          {
+            if [ -n "$AI_NOTES" ]; then
+              echo "## 🤖 AI-generated summary"
+              echo ""
+              echo "$AI_NOTES"
+              echo ""
+              echo "---"
+              echo ""
+            fi
+            echo "## 📋 Commit changelog"
+            echo ""
+            echo "**Bump type:** \`$BUMP_TYPE\`"
+            echo ""
+            echo "<details>"
+            echo "  <summary>Changes since last release</summary>"
+            echo ""
+            echo "$CHANGELOG_ENTRIES"
+            echo ""
+            echo "</details>"
+          } > release_body.md
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ inputs.tag_version }}
+          name: "Release ${{ inputs.tag_version }}"
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          body_path: release_body.md
+
+      - name: Update major version tag
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+        run: |
+          MAJOR_TAG=$(echo "$TAG_VERSION" | grep -oP '^v[0-9]+')
+          git tag -fa "$MAJOR_TAG" -m "Release $MAJOR_TAG -> $TAG_VERSION"
+          git push origin "$MAJOR_TAG" --force
+
+      - name: Release summary
+        env:
+          TAG_VERSION: ${{ inputs.tag_version }}
+          GITHUB_REPOSITORY: ${{ inputs.github_repository }}
+          CHANGELOG_ENTRIES: ${{ inputs.changelog_entries }}
+        run: |
+          {
+            echo "## Release summary"
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Release | [$TAG_VERSION](https://github.com/$GITHUB_REPOSITORY/releases/tag/$TAG_VERSION) |"
+            echo "| Bump type | \`${{ inputs.bump_type }}\` |"
+            echo ""
+            echo "### Changelog"
+            echo "$CHANGELOG_ENTRIES"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,65 @@
+---
+name: Push (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    if: inputs.tag_version != ''
+    permissions:
+      packages: write
+
+    steps:
+      - name: Download docker image
+        uses: actions/download-artifact@v8
+        with:
+          name: docker-image
+          path: /tmp
+
+      - name: Load docker image
+        run: docker load -i /tmp/docker-image.tar
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push image
+        run: |
+          docker push "ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}"
+          MAJOR_TAG=$(echo "${{ inputs.tag_version }}" | grep -oP '^v[0-9]+')
+          if [ -n "$MAJOR_TAG" ]; then
+            docker tag \
+              "ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}" \
+              "ghcr.io/${{ inputs.github_repository }}:$MAJOR_TAG"
+            docker push "ghcr.io/${{ inputs.github_repository }}:$MAJOR_TAG"
+          fi
+          docker tag \
+            "ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}" \
+            "ghcr.io/${{ inputs.github_repository }}:latest"
+          docker push "ghcr.io/${{ inputs.github_repository }}:latest"
+
+      - name: Push summary
+        run: |
+          {
+            echo "## Push summary"
+            echo "| Tag | Status |"
+            echo "| --- | --- |"
+            echo "| \`ghcr.io/${{ inputs.github_repository }}:${{ inputs.tag_version }}\` | ✅ Pushed |"
+            if echo "${{ inputs.tag_version }}" | grep -qP '^v[0-9]+'; then
+              MAJOR_TAG=$(echo "${{ inputs.tag_version }}" | grep -oP '^v[0-9]+')
+              echo "| \`ghcr.io/${{ inputs.github_repository }}:$MAJOR_TAG\` | ✅ Pushed |"
+            fi
+            echo "| \`ghcr.io/${{ inputs.github_repository }}:latest\` | ✅ Pushed |"
+          } >> "$GITHUB_STEP_SUMMARY"

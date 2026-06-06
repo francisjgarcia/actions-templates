@@ -1,0 +1,178 @@
+name: Deploy (Reusable)
+
+on:
+  workflow_call:
+    inputs:
+      tag_version:
+        required: true
+        type: string
+      github_repository:
+        required: true
+        type: string
+      containers:
+        required: true
+        type: string
+        description: 'JSON array with container configurations (no secrets)'
+    secrets:
+      APP_ENV_SECRETS:
+        required: false
+        description: 'JSON or base64-encoded JSON with arbitrary secret key/values per-repo'
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    if: inputs.tag_version != ''
+    permissions:
+      packages: read
+
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v4.2.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create networks if not exist
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          ALL_NETWORKS=$(echo "$CONTAINERS" | jq -r '
+            [.[].network, (.[].extra_networks // []) []] | unique | .[]
+          ')
+          for NETWORK in $ALL_NETWORKS; do
+            if ! docker network ls --format '{{.Name}}' | grep -q "^${NETWORK}$"; then
+              echo "Creating network: $NETWORK"
+              docker network create "$NETWORK"
+            else
+              echo "Network already exists: $NETWORK"
+            fi
+          done
+
+      - name: Deploy containers
+        env:
+          APP_ENV_SECRETS: ${{ secrets.APP_ENV_SECRETS }}
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          CONTAINER_COUNT=$(echo "$CONTAINERS" | jq '. | length')
+          echo "Deploying $CONTAINER_COUNT container(s)..."
+
+          while IFS= read -r CONTAINER; do
+            NAME=$(echo "$CONTAINER"        | jq -r '.name')
+            IMAGE=$(echo "$CONTAINER"       | jq -r '.image')
+            NETWORK=$(echo "$CONTAINER"     | jq -r '.network // empty')
+            MEMORY=$(echo "$CONTAINER"      | jq -r '.memory_limit // empty')
+            if [ -z "$MEMORY" ] || [ "$MEMORY" = "null" ]; then
+              MEMORY="512m"
+            fi
+            MEMORY_RES=$(echo "$CONTAINER"  | jq -r '.memory_reservation // empty')
+            if [ -z "$MEMORY_RES" ] || [ "$MEMORY_RES" = "null" ]; then
+              MEMORY_RES="256m"
+            fi
+            HEALTHCHECK=$(echo "$CONTAINER" | jq -r '.healthcheck_url // ""')
+            RESTART=$(echo "$CONTAINER"     | jq -r '.restart_policy // "always"')
+
+            echo "--- Deploying container: $NAME ---"
+
+            docker pull "$IMAGE"
+
+            if docker ps -a --format '{{.Names}}' | grep -q "^${NAME}$"; then
+              echo "Removing existing container: $NAME"
+              docker rm -f "$NAME"
+            fi
+
+            CMD=(docker run -d
+              --name "$NAME"
+              --hostname "$NAME"
+              --restart "$RESTART"
+            )
+
+            # Ports
+            while IFS= read -r PORT; do
+              [ -n "$PORT" ] && CMD+=(-p "$PORT")
+            done < <(echo "$CONTAINER" | jq -r '(.ports // [])[]')
+
+            # Volumes
+            while IFS= read -r VOLUME; do
+              [ -n "$VOLUME" ] && CMD+=(-v "$VOLUME")
+            done < <(echo "$CONTAINER" | jq -r '(.volumes // [])[]')
+
+            # Non-sensitive env vars from container definition
+            while IFS= read -r ENV_LINE; do
+              [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+            done < <(echo "$CONTAINER" | jq -r '(.env_vars // {}) | to_entries[] | "\(.key)=\(.value)"')
+
+            # Add network and memory flags only when appropriate
+            if [ -n "$NETWORK" ]; then
+              CMD+=(--network "$NETWORK")
+            fi
+            CMD+=(--memory "$MEMORY" --memory-reservation "$MEMORY_RES")
+
+            # Arbitrary per-repo secrets passed via workflow_call.secrets.DEPLOY_SECRETS
+            # APP_ENV_SECRETS may be raw JSON or base64-encoded JSON
+            if [ -n "$APP_ENV_SECRETS" ] && [ "$APP_ENV_SECRETS" != "null" ]; then
+              SECRETS_JSON=$(echo -n "$APP_ENV_SECRETS" | base64 -d 2>/dev/null || echo "$APP_ENV_SECRETS")
+              if [ -n "$SECRETS_JSON" ] && [ "$SECRETS_JSON" != "null" ]; then
+                while IFS= read -r ENV_LINE; do
+                  [ -n "$ENV_LINE" ] && CMD+=(-e "$ENV_LINE")
+                done < <(echo "$SECRETS_JSON" | jq -r 'to_entries[] | "\(.key)=\(.value)"')
+              fi
+            fi
+
+            # Healthcheck
+            if [ -n "$HEALTHCHECK" ]; then
+              CMD+=(
+                --health-cmd "curl -f $HEALTHCHECK || exit 1"
+                --health-start-period 30s
+                --health-interval 1h
+                --health-timeout 10s
+                --health-retries 3
+              )
+            fi
+
+            CMD+=("$IMAGE")
+
+            echo "Launching container: $NAME"
+            "${CMD[@]}"
+
+            echo "Container $NAME deployed successfully."
+
+            # Extra networks
+            while IFS= read -r EXTRA_NET; do
+              if [ -n "$EXTRA_NET" ]; then
+                echo "Connecting $NAME to extra network: $EXTRA_NET"
+                docker network connect "$EXTRA_NET" "$NAME"
+              fi
+            done < <(echo "$CONTAINER" | jq -r '(.extra_networks // [])[]')
+
+          done < <(echo "$CONTAINERS" | jq -c '.[]')
+
+      - name: Remove old images
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          echo "$CONTAINERS" | jq -r '.[].image | split(":")[0]' | sort -u | while read -r IMAGE_BASE; do
+            echo "Cleaning old images for: $IMAGE_BASE"
+            for IMAGE_ID in $(docker images -q "$IMAGE_BASE" | tail -n +2); do
+              docker rmi -f "$IMAGE_ID" || true
+            done
+          done
+
+      - name: Deploy summary
+        if: always()
+        run: |
+          CONTAINERS='${{ inputs.containers }}'
+          {
+            echo "## Deploy summary"
+            echo "| Container | Image | Network | Status |"
+            echo "| --- | --- | --- | --- |"
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "$CONTAINERS" | jq -c '.[]' | while read -r CONTAINER; do
+            NAME=$(echo "$CONTAINER"    | jq -r '.name')
+            IMAGE=$(echo "$CONTAINER"   | jq -r '.image')
+            NETWORK=$(echo "$CONTAINER" | jq -r '.network')
+            if docker ps --format '{{.Names}}' | grep -q "^${NAME}$"; then
+              STATUS="✅ Running"
+            else
+              STATUS="❌ Failed"
+            fi
+            echo "| \`$NAME\` | \`$IMAGE\` | \`$NETWORK\` | $STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          done

@@ -1,0 +1,39 @@
+---
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: bash
+    working-directory: .
+
+jobs:
+  setup:
+    name: Setup environment
+    permissions:
+      contents: read
+    if: |
+      github.event.head_commit.message != 'Initial commit' &&
+      !startsWith(github.event.head_commit.message, 'docs: update CHANGELOG.md')
+    uses: ./.github/workflows/wf-setup.yml
+
+  release:
+    name: Tag and release
+    permissions:
+      contents: write
+      models: read
+    needs: setup
+    if: needs.setup.outputs.tag_version != ''
+    uses: ./.github/workflows/wf-release.yml
+    secrets:
+      APP_PRIVATE_KEY: ${{ secrets.APP_PRIVATE_KEY }}
+    with:
+      tag_version: ${{ needs.setup.outputs.tag_version }}
+      bump_type: ${{ needs.setup.outputs.bump_type }}
+      github_repository: ${{ github.repository }}
+      changelog_entries: ${{ needs.setup.outputs.changelog_entries }}
+      APP_CLIENT_ID: ${{ vars.APP_CLIENT_ID }}

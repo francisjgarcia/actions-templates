@@ -1,0 +1,16 @@
+# Global owner — all files
+* @francisjgarcia
+
+# Workflows
+.github/workflows/ @francisjgarcia
+actions/ @francisjgarcia
+
+# Docs
+docs/ @francisjgarcia
+examples/ @francisjgarcia
+
+# Community files
+CONTRIBUTING.md @francisjgarcia
+SECURITY.md @francisjgarcia
+GOVERNANCE.md @francisjgarcia
+CODE_OF_CONDUCT.md @francisjgarcia
