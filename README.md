@@ -36,6 +36,7 @@ with automatic semantic versioning based on [Conventional Commits](https://www.c
 - **Multi-container deploy** support via JSON configuration
 - **PR title validation** enforcing Conventional Commits format
 - **Workflow linting** with actionlint and yamllint
+- **Local lint helper** — run `scripts/lint-workflows.sh` locally before pushing changes
 - **Language agnostic** — works with Python, Go or any containerized app
 - **Trunk Based Development** — single `main` branch, no `develop` branch needed
 
@@ -198,6 +199,12 @@ Container configuration schema:
 Runs actionlint and yamllint against the repository workflows.
 
 > Source: [.github/workflows/wf-lint.yml](.github/workflows/wf-lint.yml)
+>
+> Local helper script: [`scripts/lint-workflows.sh`](scripts/lint-workflows.sh)
+>
+> `actionlint` analyzes workflows in `.github/workflows/`.
+>
+> `yamllint` analyzes both `.github/workflows/` and `actions/` (uses `scripts/files/.yamllint.yml` as fallback config).
 
 | Input | Required | Default | Description |
 | --- | --- | --- | --- |
