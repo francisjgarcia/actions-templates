@@ -53,7 +53,7 @@ jobs:
       - name: Generate AI release notes
         id: ai_notes
         continue-on-error: true
-        uses: actions/ai-inference@v2
+        uses: actions/ai-inference@v3
         with:
           model: openai/gpt-4o-mini
           max-completion-tokens: 300
