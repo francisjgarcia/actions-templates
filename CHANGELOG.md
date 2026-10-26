@@ -1,14 +1,19 @@
 # Changelog
 
-## [v0.1.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.1.2) (2026-08-03)
+## [v0.1.3](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.1.3) (2026-10-26)
 
 
 ### 🐛 Bug fixes
 
+* fix(deps): bump docker/login-action (#6) ([d7f608c](https://github.com/francisjgarcia/actions-templates/commit/d7f608c)) — dependabot[bot]
+
+
+
+## [v0.1.2](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.1.2) (2026-08-03)
+### 🐛 Bug fixes
+
 * fix(deps): bump the github-actions group across 1 directory with 2 updates (#5) ([2f5c009](https://github.com/francisjgarcia/actions-templates/commit/2f5c009)) — dependabot[bot]
 * fix(deps): bump docker/login-action in the github-actions group (#3) ([4175d73](https://github.com/francisjgarcia/actions-templates/commit/4175d73)) — dependabot[bot]
-
-
 
 ## [v0.1.1](https://github.com/francisjgarcia/actions-templates/releases/tag/v0.1.1) (2026-06-22)
 
